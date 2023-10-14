@@ -1,2 +1,3 @@
-# easy-blob
-Quick and easy blob storage
+# EasyBlob
+
+Quick and easy local blob storage
