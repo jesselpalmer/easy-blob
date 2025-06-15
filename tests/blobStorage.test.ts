@@ -53,6 +53,59 @@ describe('Blob Storage API', () => {
       expect(response.status).toBe(400);
       expect(response.body.error).toBe('No file uploaded');
     });
+
+    it('should return error for disallowed MIME types', async () => {
+      // Create storage with restricted MIME types
+      const restrictedStorage = new BlobStorage({ 
+        dbPath: './testdb-restricted.sqlite', 
+        storageDir: './testuploads-restricted',
+        allowedMimeTypes: ['image/jpeg', 'image/png']
+      });
+
+      const response = await request(restrictedStorage.expressApp)
+        .post('/upload')
+        .attach('blob', path.join(__dirname, 'testdoc.txt'));
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toContain('not allowed');
+
+      // Clean up
+      try {
+        fs.unlinkSync('./testdb-restricted.sqlite');
+        fs.rmSync('./testuploads-restricted', { recursive: true, force: true });
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+    });
+
+    it('should return error for files exceeding size limit', async () => {
+      // Create a test file with content larger than the limit
+      const largeTestFile = path.join(__dirname, 'large-test.txt');
+      fs.writeFileSync(largeTestFile, 'This is content that exceeds the 10 byte limit set below');
+
+      // Create storage with very small file size limit
+      const smallStorage = new BlobStorage({ 
+        dbPath: './testdb-small.sqlite', 
+        storageDir: './testuploads-small',
+        maxFileSize: 10 // 10 byte limit
+      });
+
+      const response = await request(smallStorage.expressApp)
+        .post('/upload')
+        .attach('blob', largeTestFile);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe('File too large');
+
+      // Clean up
+      try {
+        fs.unlinkSync('./testdb-small.sqlite');
+        fs.rmSync('./testuploads-small', { recursive: true, force: true });
+        fs.unlinkSync(largeTestFile);
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+    });
   });
 
   describe('GET /files', () => {
@@ -89,7 +142,7 @@ describe('Blob Storage API', () => {
       const response = await request(app).get(`/blob/${fileId}`);
 
       expect(response.status).toBe(200);
-      expect(response.headers['content-type']).toBe('text/plain; charset=UTF-8');
+      expect(response.headers['content-type'].toLowerCase()).toBe('text/plain; charset=utf-8');
     });
 
     it('should return 404 for non-existent file', async () => {
