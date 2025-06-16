@@ -1,5 +1,10 @@
 # EasyBlob
 
+[![CI](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml/badge.svg)](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml)
+[![npm version](https://badge.fury.io/js/easy-blob.svg)](https://www.npmjs.com/package/easy-blob)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+
 Quick and easy local blob storage for Node.js applications.
 
 ## Installation
