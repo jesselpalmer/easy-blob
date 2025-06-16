@@ -39,19 +39,14 @@ describe('Blob Storage API', () => {
     app = storage.expressApp;
   });
 
+  afterEach(() => {
+    // Clean up any test-specific files created in individual tests
+    cleanupTestFiles(['./testdb-small.sqlite', './testuploads-small']);
+  });
+
   afterAll(() => {
-    // Clean up test files and database
-    try {
-      fs.unlinkSync('./testdb.sqlite');
-    } catch (e) {
-      // File might not exist, ignore error
-    }
-    
-    try {
-      fs.rmSync('./testuploads', { recursive: true, force: true });
-    } catch (e) {
-      // Directory might not exist, ignore error
-    }
+    // Final cleanup of main test artifacts
+    cleanupTestFiles(['./testdb.sqlite', './testuploads']);
   });
 
   describe('POST /upload', () => {

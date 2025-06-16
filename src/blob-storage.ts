@@ -284,10 +284,16 @@ export class BlobStorage {
         const filePath = path.join(this.storageDir, row.path);
         fs.unlink(filePath, (err) => {
           if (err) {
-            console.error(`Error deleting physical file: ${err.message}`);
-            return res
-              .status(500)
-              .json({ error: 'Failed to delete physical file' } as ErrorResponse);
+            // If file doesn't exist, treat it as already deleted
+            if (err.code === 'ENOENT') {
+              console.warn(`Physical file already missing for blob ID ${blobId}: ${err.message}`);
+              // Continue with database deletion since file is already gone
+            } else {
+              console.error(`Error deleting physical file: ${err.message}`);
+              return res
+                .status(500)
+                .json({ error: 'Failed to delete physical file' } as ErrorResponse);
+            }
           }
 
           // Delete the database record
