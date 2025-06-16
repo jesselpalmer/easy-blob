@@ -19,7 +19,8 @@
     "lint:md:fix": "markdownlint --fix *.md",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
-    "lint": "npm run lint:md && npm run format:check"
+    "lint": "npm run lint:md && npm run format:check",
+    "check": "npm run build && npm run lint && npm test"
   },
   "repository": {
     "type": "git",

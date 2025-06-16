@@ -210,7 +210,7 @@ export class BlobStorage {
       const blobId = parseInt(req.params.id);
 
       // Validate the blob ID
-      if (!blobId || isNaN(blobId) || blobId <= 0 || !Number.isInteger(blobId)) {
+      if (isNaN(blobId) || blobId <= 0 || !Number.isInteger(blobId)) {
         return res.status(400).json({ error: 'Invalid blob ID' } as ErrorResponse);
       }
 
@@ -254,7 +254,7 @@ export class BlobStorage {
       const blobId = parseInt(req.params.id);
 
       // Validate the blob ID
-      if (!blobId || isNaN(blobId) || blobId <= 0 || !Number.isInteger(blobId)) {
+      if (isNaN(blobId) || blobId <= 0 || !Number.isInteger(blobId)) {
         return res.status(400).json({ error: 'Invalid blob ID' } as ErrorResponse);
       }
 
