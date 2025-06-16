@@ -4,6 +4,26 @@ import path from 'path';
 import { BlobStorage } from '../src/blob-storage';
 
 /**
+ * Helper function to clean up test files and directories
+ */
+function cleanupTestFiles(paths: string[]): void {
+  for (const filePath of paths) {
+    try {
+      if (fs.existsSync(filePath)) {
+        const stats = fs.statSync(filePath);
+        if (stats.isDirectory()) {
+          fs.rmSync(filePath, { recursive: true, force: true });
+        } else {
+          fs.unlinkSync(filePath);
+        }
+      }
+    } catch (e) {
+      // Ignore cleanup errors
+    }
+  }
+}
+
+/**
  * Test suite for BlobStorage API endpoints
  */
 describe('Blob Storage API', () => {
@@ -98,13 +118,7 @@ describe('Blob Storage API', () => {
       expect(response.body.error).toBe('File too large');
 
       // Clean up
-      try {
-        fs.unlinkSync('./testdb-small.sqlite');
-        fs.rmSync('./testuploads-small', { recursive: true, force: true });
-        fs.unlinkSync(largeTestFile);
-      } catch (e) {
-        // Ignore cleanup errors
-      }
+      cleanupTestFiles(['./testdb-small.sqlite', './testuploads-small', largeTestFile]);
     });
   });
 

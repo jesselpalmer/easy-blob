@@ -232,12 +232,23 @@ export class BlobStorage {
           JSON.stringify(row)
         );
 
-        // Send the actual file
-        res.sendFile(row.path, { root: this.storageDir }, (err) => {
-          if (err) {
-            console.error(`Error serving file: ${err.message}`);
-            res.status(404).json({ error: 'File not found' } as ErrorResponse);
+        // Check if the file exists before sending it
+        const filePath = path.join(this.storageDir, row.path);
+        fs.access(filePath, fs.constants.F_OK | fs.constants.R_OK, (accessErr) => {
+          if (accessErr) {
+            console.error(`File access error for blob ID ${blobId}: ${accessErr.message}`);
+            return res
+              .status(404)
+              .json({ error: 'File not found or inaccessible' } as ErrorResponse);
           }
+
+          // Send the actual file
+          res.sendFile(row.path, { root: this.storageDir }, (err) => {
+            if (err) {
+              console.error(`Error serving file for blob ID ${blobId}: ${err.message}`);
+              res.status(500).json({ error: 'Error serving the file' } as ErrorResponse);
+            }
+          });
         });
       });
     });
