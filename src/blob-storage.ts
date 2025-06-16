@@ -269,24 +269,27 @@ export class BlobStorage {
           return res.status(404).json({ error: 'Blob not found' } as ErrorResponse);
         }
 
-        // Delete the database record first
-        this.db.deleteBlob(blobId, (err: Error | null, deleted?: boolean) => {
+        // Delete the physical file first
+        const filePath = path.join(this.storageDir, row.path);
+        fs.unlink(filePath, (err) => {
           if (err) {
-            console.error(`Error deleting blob from database: ${err.message}`);
-            return res.status(500).json({ error: 'Server error' } as ErrorResponse);
+            console.error(`Error deleting physical file: ${err.message}`);
+            return res
+              .status(500)
+              .json({ error: 'Failed to delete physical file' } as ErrorResponse);
           }
 
-          if (!deleted) {
-            return res.status(404).json({ error: 'Blob not found' } as ErrorResponse);
-          }
-
-          // Delete the physical file
-          const filePath = path.join(this.storageDir, row.path);
-          fs.unlink(filePath, (err) => {
+          // Delete the database record
+          this.db.deleteBlob(blobId, (err: Error | null, deleted?: boolean) => {
             if (err) {
-              console.error(`Error deleting physical file: ${err.message}`);
-              // Don't return error here - database record is already deleted
+              console.error(`Error deleting blob from database: ${err.message}`);
+              return res.status(500).json({ error: 'Server error' } as ErrorResponse);
             }
+
+            if (!deleted) {
+              return res.status(404).json({ error: 'Blob not found' } as ErrorResponse);
+            }
+
             res.json({ message: 'File deleted successfully' });
           });
         });

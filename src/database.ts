@@ -241,4 +241,29 @@ export class Database {
       }
     );
   }
+
+  /**
+   * Closes the database connection gracefully.
+   *
+   * This should be called when shutting down the application to ensure
+   * proper cleanup of database resources.
+   *
+   * @example
+   * ```typescript
+   * const db = new Database('./blobs.db');
+   * // ... use database
+   * db.close(); // Clean shutdown
+   * ```
+   */
+  close(): void {
+    if (this.db) {
+      this.db.close((err) => {
+        if (err) {
+          console.error(`Error closing database: ${err.message}`);
+        } else {
+          console.log('Database connection closed.');
+        }
+      });
+    }
+  }
 }
