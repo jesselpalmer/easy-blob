@@ -246,7 +246,7 @@ export class BlobStorage {
           res.sendFile(row.path, { root: this.storageDir }, (err) => {
             if (err) {
               console.error(`Error serving file for blob ID ${blobId}: ${err.message}`);
-              res.status(500).json({ error: 'Error serving the file' } as ErrorResponse);
+              return res.status(500).json({ error: 'Error serving the file' } as ErrorResponse);
             }
           });
         });

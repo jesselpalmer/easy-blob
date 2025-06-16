@@ -130,9 +130,9 @@ export class Database {
           );
         }
         callback(err, this.lastID);
+        statement.finalize();
       }
     );
-    statement.finalize();
   }
 
   /**
