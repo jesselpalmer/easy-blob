@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { BlobStorage } from 'easy-blob';
+ * import { BlobStorage } from '@jesselpalmer/easy-blob';
  *
  * const storage = new BlobStorage({
  *   storageDir: './uploads',
