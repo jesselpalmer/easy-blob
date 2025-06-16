@@ -79,8 +79,8 @@ npm install @jesselpalmer/easy-blob
 
 **Package Name**: `@jesselpalmer/easy-blob`  
 **License**: MIT  
-**Repository**: https://github.com/jesselpalmer/easy-blob  
-**Issues**: https://github.com/jesselpalmer/easy-blob/issues  
+**Repository**: <https://github.com/jesselpalmer/easy-blob>  
+**Issues**: <https://github.com/jesselpalmer/easy-blob/issues>
 
 ### Badges
 
