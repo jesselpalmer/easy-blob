@@ -1,7 +1,7 @@
 # EasyBlob
 
 [![CI](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml/badge.svg)](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/easy-blob.svg)](https://www.npmjs.com/package/easy-blob)
+[![npm version](https://badge.fury.io/js/@jesselpalmer%2Feasy-blob.svg)](https://www.npmjs.com/package/@jesselpalmer/easy-blob)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 
@@ -10,7 +10,7 @@ Quick and easy local blob storage for Node.js applications.
 ## Installation
 
 ```bash
-npm install easy-blob
+npm install @jesselpalmer/easy-blob
 ```
 
 ## Quick Start
@@ -18,7 +18,7 @@ npm install easy-blob
 ### JavaScript
 
 ```javascript
-const BlobStorage = require('easy-blob');
+const BlobStorage = require('@jesselpalmer/easy-blob');
 
 // Create storage instance
 const storage = new BlobStorage({
@@ -33,7 +33,7 @@ storage.start(3000);
 ### TypeScript
 
 ```typescript
-import { BlobStorage, BlobStorageOptions } from 'easy-blob';
+import { BlobStorage, BlobStorageOptions } from '@jesselpalmer/easy-blob';
 
 // Create storage instance with type safety
 const options: BlobStorageOptions = {
@@ -110,7 +110,7 @@ Delete a file by its ID (removes both database record and physical file).
 **JavaScript:**
 
 ```javascript
-const BlobStorage = require('easy-blob');
+const BlobStorage = require('@jesselpalmer/easy-blob');
 
 const storage = new BlobStorage();
 storage.start(3000);
@@ -119,7 +119,7 @@ storage.start(3000);
 **TypeScript:**
 
 ```typescript
-import { BlobStorage } from 'easy-blob';
+import { BlobStorage } from '@jesselpalmer/easy-blob';
 
 const storage = new BlobStorage();
 storage.start(3000);
@@ -149,7 +149,7 @@ curl -X DELETE http://localhost:3000/blob/1
 **TypeScript:**
 
 ```typescript
-import { BlobStorage, BlobStorageOptions } from 'easy-blob';
+import { BlobStorage, BlobStorageOptions } from '@jesselpalmer/easy-blob';
 import path from 'path';
 
 const options: BlobStorageOptions = {
