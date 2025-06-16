@@ -87,7 +87,7 @@ export class Database {
    *
    * @param originalName - The original filename as uploaded by the user
    * @param mimeType - The MIME type of the file (e.g., 'image/jpeg')
-   * @param path - The filename where the file is stored on disk
+   * @param filePath - The filename where the file is stored on disk
    * @param callback - Callback function with (error, insertedId)
    *
    * @example
@@ -104,7 +104,7 @@ export class Database {
   insertBlob(
     originalName: string,
     mimeType: string,
-    path: string,
+    filePath: string,
     callback: (err: Error | null, id?: number) => void
   ): void {
     const statement = this.db.prepare(
@@ -114,7 +114,7 @@ export class Database {
     statement.run(
       originalName,
       mimeType,
-      path,
+      filePath,
       new Date().toISOString(),
       function (this: sqlite3.RunResult, err: Error | null) {
         if (err) {
@@ -123,7 +123,7 @@ export class Database {
           console.log(
             `Inserted blob metadata:`,
             JSON.stringify({
-              filename: path,
+              filename: filePath,
               mimeType: mimeType,
               originalName: originalName,
             })
