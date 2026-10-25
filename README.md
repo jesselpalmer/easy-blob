@@ -7,6 +7,8 @@
 
 Quick and easy local blob storage for Node.js applications.
 
+See the [roadmap](ROADMAP.md) and [starting-state assessment](docs/ASSESSMENT.md) for release-readiness work.
+
 ## Installation
 
 ```bash
