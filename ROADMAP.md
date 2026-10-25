@@ -6,15 +6,15 @@ This roadmap and the linked issues were created before implementation.
 ## Release readiness — 2.0 candidate
 
 Outcome: a dependable, documented local storage library that works from the npm tarball.
-Status: implemented and independently reviewed; local checks pass, supported-platform CI is the remaining gate.
+Status: release-readiness implementation complete, independently reviewed and verified on the supported CI matrix.
 Publication, release tags and merging require maintainer authorization.
 
 | Work | Priority | Ticket | Status |
 | --- | --- | --- | --- |
 | Storage identity, consistency, recovery and ownership | Critical | [#17](https://github.com/jesselpalmer/easy-blob/issues/17) | Implemented; reviewed |
 | Awaitable lifecycle, protected mounting and HTTP contracts | Critical | [#18](https://github.com/jesselpalmer/easy-blob/issues/18) | Implemented; reviewed |
-| Dependencies, supported runtimes and packaged consumers | High | [#19](https://github.com/jesselpalmer/easy-blob/issues/19) | Local checks pass; CI pending |
-| Isolated contract tests and verification evidence | High | [#20](https://github.com/jesselpalmer/easy-blob/issues/20) | 88 tests pass; CI pending |
+| Dependencies, supported runtimes and packaged consumers | High | [#19](https://github.com/jesselpalmer/easy-blob/issues/19) | Verified locally and in CI |
+| Isolated contract tests and verification evidence | High | [#20](https://github.com/jesselpalmer/easy-blob/issues/20) | 88 tests pass across CI |
 | Onboarding, operations, migration and release documentation | High | [#21](https://github.com/jesselpalmer/easy-blob/issues/21) | Implemented; reviewed |
 
 Storage and lifecycle contracts establish the foundation. Package and integration tests verify those

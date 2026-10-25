@@ -78,16 +78,25 @@ integration/documentation. Findings were reproduced and fixed before the candida
 Reviewers rechecked fixes and reported no remaining material blocker within the declared support model.
 The HTTP error-header and example-shutdown findings have retained regression checks.
 
-## Remaining gates and limits
+## CI evidence and remaining limits
 
 The GitHub CI matrix runs Node 22/24 on Ubuntu, Windows Server 2022 and macOS, plus a coverage job.
-Its results must pass for the reviewed candidate before publication. Local Linux checks do not
-establish Windows/macOS behavior or every architecture shipped by the native dependency.
+All seven jobs passed in [CI run 34](https://github.com/jesselpalmer/easy-blob/actions/runs/40167330150)
+for source commit `0a6b00010c0c59250357b2fc273560b87b550fad`: six supported OS/runtime entries and coverage.
+Each matrix entry ran clean installation, the complete check including tarball reinstall/consumers,
+and the runtime audit. This does not establish every architecture shipped by the native dependency.
 The first CI run passed both Linux/macOS runtimes, Windows Node 24 and coverage, but Windows Node 22
 failed during installation: npm's upstream implicit-build bug invoked node-gyp, which could not
 detect Visual Studio 2026. The matrix now uses the compatible Visual Studio 2022 runner, and package
 verification also performs `npm ci` after the first clean installation. Native build-toolchain
 prerequisites are documented; no blanket script bypass or SQLite downgrade hides the failure.
+
+The enhanced local consumer reinstall initially hit a sandbox-specific Node-header extraction error
+(`fchown` returned `EINVAL`). Repeating the checks with official matching Node headers extracted
+without changing ownership, supplied through `npm_config_nodedir`, passed on both Node versions.
+Hosted CI passed normal installs/reinstalls without that local environment adjustment.
+The candidate meets the declared release-readiness criteria; merge, tags and publication remain
+explicit maintainer decisions. Final report-only changes do not alter the verified source or lockfile.
 No power-loss fault campaign, network-filesystem qualification, multi-process support or external
 adoption study is claimed. Those capabilities are outside this release's support contract.
 

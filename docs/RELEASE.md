@@ -24,13 +24,13 @@ and attachment-only binary downloads. Read [the migration guide](MIGRATION.md) b
 
 ## Candidate review gates
 
-- [ ] `npm ci` succeeds from the committed lockfile on supported platforms/runtimes.
+- [x] `npm ci` succeeds from the committed lockfile on supported platforms/runtimes.
 - [x] `npm run check` passes, including clean installed CJS, ESM and strict TypeScript consumers.
 - [x] The actual packaged examples complete upload/list/download/delete and protected-route checks.
 - [x] Real text and binary downloads match uploaded bytes; restart and legacy-data fixtures pass.
 - [x] Collision, filesystem/database failure, cancellation, recovery and read/delete races pass.
 - [x] Startup failure, protected middleware ordering and repeated shutdown leave no owned resources.
-- [ ] Supported CI matrix passes for the candidate commit; unavailable checks remain unverified.
+- [x] Supported CI matrix passes for the candidate commit; unavailable checks remain unverified.
 - [x] Runtime/development dependency findings are reviewed with exposure and remediation recorded.
 - [x] Independent storage/security, API/package and onboarding reviews have no unresolved blocker.
 - [x] README, migration, operations, roadmap and issue status match implemented behavior.
