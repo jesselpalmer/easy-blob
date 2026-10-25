@@ -22,8 +22,9 @@ Keep Node updated within the supported lines: an engines minimum cannot predict 
 The former `sqlite3` dependency's official repository is archived and explicitly unmaintained.
 Although its latest release is 6.0.1, replacing it has concrete maintenance and installation benefits.
 `better-sqlite3` 13.0.3 embeds SQLite 3.53.4 and includes native binaries in its npm artifact for
-Linux glibc/musl, macOS and Windows on x64 and arm64. This removes the former install-time
-`prebuild-install`/`node-gyp`/`tar` dependency chain. Native loading and packed-consumer lifecycle checks
+Linux glibc/musl, macOS and Windows on x64 and arm64. This removes the former package dependency chain
+through `prebuild-install`/`node-gyp`/`tar`, but does not guarantee a toolchain-free install; see below.
+Native loading and packed-consumer lifecycle checks
 passed on Linux x64 with Node 22.23.4 and 24.22.1.
 The CI matrix checks Node 22/24 on Ubuntu, Windows and macOS; that matrix does not prove every architecture.
 
@@ -31,6 +32,30 @@ Metadata queries now run synchronously. They are small local operations, but can
 EasyBlob does not promise suitability for heavy database workloads. The SQLite file format and legacy
 metadata upgrade path are verified by integration tests. Node's built-in `node:sqlite` was considered;
 it remains experimental on Node 22 and a release candidate on Node 24, so it was not selected here.
+
+## Known native installation issue
+
+An initial package installation can succeed while a clean installation from its lockfile fails.
+The confirmed upstream issue [npm/cli#9837](https://github.com/npm/cli/issues/9837) loses
+`gypfile: false` metadata and can infer a `node-gyp rebuild` step for better-sqlite3 13.0.3,
+even though a prebuilt binary is present. The upstream fix
+[#10061](https://github.com/npm/cli/pull/10061) remains open at review time.
+Reports include npm 10 and 11 on multiple operating systems, so upgrading to npm 11 alone
+is not a reliable fix. EasyBlob's first Windows / Node 22 CI run reproduced the failure.
+
+Until the upstream fix is released and validated, have a native toolchain available for clean
+lockfile installs: Python and a supported C/C++ build environment (Visual Studio 2022 C++ Build Tools
+on Windows, Xcode Command Line Tools on macOS, and standard build-essential tools on Linux).
+Follow [node-gyp's installation guidance](https://github.com/nodejs/node-gyp#installation).
+The Windows / Node 22 CI job uses a runner with Visual Studio 2022 because its bundled npm 10
+uses node-gyp that does not recognize the newer Visual Studio on windows-latest.
+No scripts are disabled to make the native installation check pass.
+
+Keep better-sqlite3 13.0.3 and its current bundled SQLite fixes rather than hiding this issue
+with a blanket script bypass or claiming an unverified npm version requirement.
+Revisit the toolchain prerequisite when the upstream fix ships and passes both fresh installation
+and clean lockfile installation across the supported matrix. See also
+[better-sqlite3#1516](https://github.com/WiseLibs/better-sqlite3/issues/1516).
 
 ## Development tooling
 
@@ -93,7 +118,8 @@ type dependencies. Build cleans `dist` first, and `prepack` builds before creati
 Source/declaration maps pointing to omitted TypeScript source are no longer included.
 
 `npm run test:package` installs the actual tarball in an operating-system temporary directory outside
-the checkout, with no `NODE_PATH` inheritance. It checks CJS and ESM imports, real HTTP upload/list/download/
+the checkout, with no `NODE_PATH` inheritance. It runs both the first `npm install` and a subsequent
+clean `npm ci` from the generated consumer lockfile. It checks CJS and ESM imports, real HTTP upload/list/download/
 delete, exact binary bytes, close/reopen persistence, repeated close, strict TypeScript `.cts` and `.mts`
 consumers with `skipLibCheck: false`, and the packaged runnable example with and without authentication.
 It checks the package file allowlist and removes the temporary consumer when finished.

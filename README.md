@@ -30,9 +30,10 @@ npm install /path/to/jesselpalmer-easy-blob-2.0.0-rc.1.tgz
 ```
 
 Supported runtimes are **Node.js 22.23.4+ within 22.x and 24.22.1+ within 24.x**.
-The CI matrix targets Linux, macOS and Windows; consult the candidate verification report for results.
+CI targets Linux, macOS and Windows Server 2022 with Visual Studio 2022; consult the verification report.
 Other Node majors and network filesystems are not supported. The native `better-sqlite3` dependency
-ships bundled binaries for common platforms; see [installation troubleshooting](#troubleshooting).
+ships bundled binaries for common platforms. An upstream npm issue can still invoke native build
+tooling during installation; see [installation troubleshooting](#troubleshooting) before deploying.
 
 Existing users should read the [2.0 migration guide](docs/MIGRATION.md) before opening their data.
 
@@ -227,11 +228,15 @@ or complete metadata.
 
 ## Troubleshooting
 
-- **Native SQLite load fails:** better-sqlite3 13 ships binaries in its npm artifact for Linux
+- **Native SQLite installation/load fails:** better-sqlite3 13 ships binaries in its npm artifact for Linux
   glibc/musl, macOS and Windows on x64/arm64. Use a supported Node version and platform; do not reuse
   `node_modules` copied from a different OS or architecture. The packaged native binary must be present.
-  Unsupported environments require separately validated upstream builds; EasyBlob does not promise
-  automatic source-build fallback. See [dependency decisions](docs/DEPENDENCIES.md).
+  A known npm issue can invoke `node-gyp rebuild` despite these binaries, including on clean lockfile
+  reinstalls. Have Python and a compatible C++ toolchain available. On Windows, use Visual Studio 2022
+  with the Desktop development with C++ workload; Node 22's bundled npm does not recognize the newer
+  Visual Studio 2026 toolchain. Updating npm alone is not a proven fix. See the
+  [upstream installation issue](https://github.com/WiseLibs/better-sqlite3/issues/1516) and
+  [dependency decisions](docs/DEPENDENCIES.md). Other architectures need separately validated builds.
 - **Storage already owned after a crash:** stop all applications using either path, then follow the
   [manual lock recovery procedure](docs/OPERATIONS.md). Do not remove locks from an active owner.
 - **Permission or database-open failure:** verify the application can create files in both locations,

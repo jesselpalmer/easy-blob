@@ -17,7 +17,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # VS 2022 supports npm's implicit native-build fallback; newer VS is not
+        # recognized by the node-gyp bundled with Node 22's npm 10.
+        os: [ubuntu-latest, windows-2022, macos-latest]
         node-version: [22.x, 24.x]
     steps:
       - uses: actions/checkout@v7.0.1

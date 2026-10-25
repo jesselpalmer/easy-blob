@@ -1,7 +1,10 @@
 # Contributing
 
 Use Node.js 22.23.4+ within 22.x or 24.22.1+ within 24.x and npm. The selected native SQLite
-dependency bundles binaries for common platforms; see [dependency decisions](docs/DEPENDENCIES.md).
+dependency bundles binaries for common platforms. A known npm issue can nevertheless invoke node-gyp:
+have Python and a compatible C++ toolchain available (Visual Studio 2022 with Desktop development
+with C++ on Windows). CI uses Windows Server 2022 for that supported toolchain.
+See [dependency decisions](docs/DEPENDENCIES.md) and [installation troubleshooting](README.md#troubleshooting).
 
 ```sh
 npm ci

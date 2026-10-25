@@ -94,6 +94,9 @@ try {
     ['install', '--omit=dev', '--no-audit', '--no-fund', path.join(temporary, artifact.filename)],
     consumer
   );
+  // A first install and a clean lockfile reinstall use different npm metadata paths.
+  // Exercise both: native dependencies can succeed initially but fail under npm ci.
+  npm(['ci', '--omit=dev', '--no-audit', '--no-fund'], consumer);
   const imports = {
     cjs: `const { BlobStorage, Database } = require('@jesselpalmer/easy-blob');
 const assert = require('node:assert/strict');

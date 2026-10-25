@@ -80,9 +80,14 @@ The HTTP error-header and example-shutdown findings have retained regression che
 
 ## Remaining gates and limits
 
-The GitHub CI matrix runs Node 22/24 on Ubuntu, Windows and macOS, plus a coverage job.
+The GitHub CI matrix runs Node 22/24 on Ubuntu, Windows Server 2022 and macOS, plus a coverage job.
 Its results must pass for the reviewed candidate before publication. Local Linux checks do not
 establish Windows/macOS behavior or every architecture shipped by the native dependency.
+The first CI run passed both Linux/macOS runtimes, Windows Node 24 and coverage, but Windows Node 22
+failed during installation: npm's upstream implicit-build bug invoked node-gyp, which could not
+detect Visual Studio 2026. The matrix now uses the compatible Visual Studio 2022 runner, and package
+verification also performs `npm ci` after the first clean installation. Native build-toolchain
+prerequisites are documented; no blanket script bypass or SQLite downgrade hides the failure.
 No power-loss fault campaign, network-filesystem qualification, multi-process support or external
 adoption study is claimed. Those capabilities are outside this release's support contract.
 
