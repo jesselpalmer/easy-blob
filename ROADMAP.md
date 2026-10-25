@@ -6,20 +6,23 @@ This roadmap and the linked issues were created before implementation.
 ## Release readiness — 2.0 candidate
 
 Outcome: a dependable, documented local storage library that works from the npm tarball.
-Status: in progress. Publication, release tags and merging require maintainer authorization.
+Status: implemented and independently reviewed; local checks pass, supported-platform CI is the remaining gate.
+Publication, release tags and merging require maintainer authorization.
 
 | Work | Priority | Ticket | Status |
 | --- | --- | --- | --- |
-| Storage identity, consistency, recovery and ownership | Critical | [#17](https://github.com/jesselpalmer/easy-blob/issues/17) | Planned |
-| Awaitable lifecycle, protected mounting and HTTP contracts | Critical | [#18](https://github.com/jesselpalmer/easy-blob/issues/18) | Planned |
-| Dependencies, supported runtimes and packaged consumers | High | [#19](https://github.com/jesselpalmer/easy-blob/issues/19) | Planned |
-| Isolated contract tests and verification evidence | High | [#20](https://github.com/jesselpalmer/easy-blob/issues/20) | Planned |
-| Onboarding, operations, migration and release documentation | High | [#21](https://github.com/jesselpalmer/easy-blob/issues/21) | Planned |
+| Storage identity, consistency, recovery and ownership | Critical | [#17](https://github.com/jesselpalmer/easy-blob/issues/17) | Implemented; reviewed |
+| Awaitable lifecycle, protected mounting and HTTP contracts | Critical | [#18](https://github.com/jesselpalmer/easy-blob/issues/18) | Implemented; reviewed |
+| Dependencies, supported runtimes and packaged consumers | High | [#19](https://github.com/jesselpalmer/easy-blob/issues/19) | Local checks pass; CI pending |
+| Isolated contract tests and verification evidence | High | [#20](https://github.com/jesselpalmer/easy-blob/issues/20) | 88 tests pass; CI pending |
+| Onboarding, operations, migration and release documentation | High | [#21](https://github.com/jesselpalmer/easy-blob/issues/21) | Implemented; reviewed |
 
 Storage and lifecycle contracts establish the foundation. Package and integration tests verify those
 contracts; documentation and the release checklist depend on verified final behavior.
 Existing dependency PRs #9, #10, #11, #12, #13, #14 and #16 are reviewed as overlapping work,
 not duplicated as individual upgrade tickets.
+See [verification evidence](docs/VERIFICATION.md), [release checklist](docs/RELEASE.md) and
+[migration guidance](docs/MIGRATION.md). Issues remain open until the implementation is merged.
 
 Exit conditions: clean installation, CJS/ESM/TypeScript consumers, tested examples, exact byte
 preservation, old-data compatibility, documented failure/recovery and concurrency behavior,
@@ -35,7 +38,8 @@ No distributed storage, cloud adapters, admin UI, background service or speculat
 
 Outcome: five independent developers integrate the candidate into real local tools, small applications
 or internal services. Depends on release readiness. Prepare an opt-in study without contacting anyone.
-Measure time to first successful complete lifecycle, assistance required, failures, alternatives,
+The [study plan](docs/ADOPTION.md) is prepared; no outreach has occurred. Measure time to first
+successful complete lifecycle, assistance required, failures, alternatives,
 work avoided and continued use after two weeks. Record reasons for abandonment as well as successes.
 Exit: five completed reports and a documented retain, revise or stop decision; no feature expansion
 solely on survey enthusiasm.

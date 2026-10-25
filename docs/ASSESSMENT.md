@@ -26,10 +26,10 @@ The published 1.0.0 package reports this same git revision; artifact inspection 
 Crash durability, recovery after interruption, competing owners, supported module consumption,
 native installation across platforms and dependency security require experiments beyond source review.
 No claim of power-loss durability or multi-process support is justified by the baseline.
-Baseline installation, build, lint and test results will be recorded in the final verification report.
+Baseline installation, build, lint and test results are recorded in the [verification report](VERIFICATION.md).
 
 ## Dependency work already open
 
 Dependabot PRs #9 (Multer), #10 (form-data), #11 (tar-fs), #12 (js-yaml), #13 (body-parser),
-#14 (Express), #16 (qs) overlap the dependency milestone. Current registry and official advisories,
+PR #14 (Express) and #16 (qs) overlap the dependency milestone. Current registry and official advisories,
 not just those proposed versions, determine selected updates.
