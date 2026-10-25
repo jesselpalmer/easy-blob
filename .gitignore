@@ -131,6 +131,10 @@ dist
 
 # Local database file
 *.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.easyblob-lock/
 
 # Project specific - development artifacts
 myuploads/

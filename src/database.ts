@@ -1,269 +1,211 @@
-import sqlite3 from 'sqlite3';
+import BetterSqlite3 from 'better-sqlite3';
 
-/**
- * Represents a blob metadata record from the database
- */
+/** Metadata layout retained from EasyBlob 1.x. */
 export interface BlobMetadata {
-  /** Unique identifier for the blob */
   id: number;
-  /** Original filename when uploaded */
   original_name: string;
-  /** MIME type of the file */
   mime_type: string;
-  /** Filename where the file is stored on disk */
   path: string;
-  /** ISO string timestamp of when the file was uploaded */
   upload_timestamp: string;
 }
 
+export interface PendingDeletion {
+  id: number;
+  path: string;
+}
+
 /**
- * Database abstraction layer for blob metadata storage using SQLite.
- *
- * Handles all database operations including creating tables, inserting blob metadata,
- * retrieving blob information, and managing the blob lifecycle.
- *
- * @example
- * ```typescript
- * const db = new Database('./my-blobs.db');
- * db.insertBlob('document.pdf', 'application/pdf', '12345.pdf', (err, id) => {
- *   if (!err) console.log(`Blob stored with ID: ${id}`);
- * });
- * ```
+ * Low-level metadata access. Callback methods remain available for 1.x consumers.
+ * This class does not coordinate physical files; use BlobStorage for file operations.
  */
 export class Database {
-  /** SQLite database connection instance */
-  private db: sqlite3.Database;
+  private db?: BetterSqlite3.Database;
+  private readonly initialization: Promise<void>;
+  private callbacks: Promise<void> = Promise.resolve();
+  private closing = false;
+  private closure?: Promise<void>;
 
-  /**
-   * Creates a new Database instance and establishes connection to SQLite.
-   *
-   * Automatically creates the blob_metadata table if it doesn't exist.
-   *
-   * @param dbPath - Path to the SQLite database file
-   * @throws Error if database connection fails
-   */
   constructor(dbPath: string) {
-    this.db = new sqlite3.Database(dbPath, (err) => {
-      if (err) {
-        console.error(`Error initializing SQLite database: ${err.message}`);
-        throw err;
+    if (typeof dbPath !== 'string' || dbPath.length === 0 || dbPath.includes('\0')) {
+      throw new TypeError('dbPath must be a non-empty path');
+    }
+    this.initialization = Promise.resolve().then(() => {
+      const connection = new BetterSqlite3(dbPath);
+      try {
+        connection.pragma('busy_timeout = 5000');
+        connection.pragma('synchronous = FULL');
+        connection.exec(`
+          CREATE TABLE IF NOT EXISTS blob_metadata (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            original_name TEXT,
+            mime_type TEXT,
+            path TEXT,
+            upload_timestamp TEXT
+          );
+          CREATE TABLE IF NOT EXISTS easyblob_pending_deletions (
+            id INTEGER PRIMARY KEY,
+            path TEXT NOT NULL
+          );
+          CREATE TABLE IF NOT EXISTS easyblob_store (
+            singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+            identity TEXT NOT NULL
+          );
+        `);
+        this.db = connection;
+      } catch (error) {
+        connection.close();
+        throw error;
       }
-      console.log('Connected to the SQLite database.');
-      this.initialize();
     });
+    // Failures are observable through ready() and operations, never uncaught async throws.
+    void this.initialization.catch(() => undefined);
   }
 
-  /**
-   * Creates the blob_metadata table if it doesn't already exist.
-   *
-   * Table schema:
-   * - id: INTEGER PRIMARY KEY AUTOINCREMENT
-   * - original_name: TEXT (original filename)
-   * - mime_type: TEXT (file MIME type)
-   * - path: TEXT (stored filename)
-   * - upload_timestamp: TEXT (ISO timestamp)
-   */
-  private initialize(): void {
-    this.db.run(
-      `CREATE TABLE IF NOT EXISTS blob_metadata (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      original_name TEXT,
-      mime_type TEXT,
-      path TEXT,
-      upload_timestamp TEXT
-    )`,
-      (err) => {
-        if (err) {
-          console.error(`Error creating blob_metadata table: ${err.message}`);
-        } else {
-          console.log('blob_metadata table initialized or already exists.');
+  ready(): Promise<void> {
+    return this.initialization;
+  }
+
+  private connection(): BetterSqlite3.Database {
+    if (!this.db?.open) throw new Error('Database is not open');
+    return this.db;
+  }
+
+  /** @internal Synchronous operations are used only after ready(). */
+  insertSync(originalName: string, mimeType: string, filePath: string): number {
+    return this.connection().transaction(() => {
+      const result = this.connection()
+        .prepare(
+          'INSERT INTO blob_metadata(original_name, mime_type, path, upload_timestamp) VALUES (?, ?, ?, ?)'
+        )
+        .safeIntegers(true)
+        .run(originalName, mimeType, filePath, new Date().toISOString());
+      const id = BigInt(result.lastInsertRowid);
+      if (id <= 0n || id > BigInt(Number.MAX_SAFE_INTEGER)) {
+        throw new RangeError('Blob ID exceeds the supported safe integer range');
+      }
+      return Number(id);
+    })();
+  }
+
+  /** @internal */
+  storeIdentitySync(): string | undefined {
+    const rows = this.connection()
+      .prepare('SELECT singleton, identity FROM easyblob_store')
+      .all() as Array<{ singleton: number; identity: string }>;
+    if (rows.length > 1 || (rows.length === 1 && rows[0].singleton !== 1)) {
+      throw new Error('Invalid database storage identity');
+    }
+    return rows[0]?.identity;
+  }
+
+  /** @internal Initial binding only; never replace a prior identity. */
+  bindStoreIdentitySync(identity: string): void {
+    this.connection()
+      .prepare('INSERT INTO easyblob_store(singleton, identity) VALUES (1, ?)')
+      .run(identity);
+  }
+
+  /** @internal */
+  getSync(id: number): BlobMetadata | undefined {
+    return this.connection().prepare('SELECT * FROM blob_metadata WHERE id = ?').get(id) as
+      BlobMetadata | undefined;
+  }
+
+  /** @internal */
+  listSync(): BlobMetadata[] {
+    return this.connection()
+      .prepare('SELECT * FROM blob_metadata ORDER BY upload_timestamp DESC, id DESC')
+      .all() as BlobMetadata[];
+  }
+
+  /** @internal Atomically hide a blob and retain the path needed for cleanup. */
+  beginDeleteSync(id: number): PendingDeletion | undefined {
+    return this.connection().transaction(() => {
+      const row = this.getSync(id);
+      if (!row) return undefined;
+      this.connection()
+        .prepare('INSERT INTO easyblob_pending_deletions(id, path) VALUES (?, ?)')
+        .run(id, row.path);
+      this.connection().prepare('DELETE FROM blob_metadata WHERE id = ?').run(id);
+      return { id, path: row.path };
+    })();
+  }
+
+  /** @internal */
+  pendingDeletionsSync(): PendingDeletion[] {
+    return this.connection()
+      .prepare('SELECT id, path FROM easyblob_pending_deletions ORDER BY id')
+      .all() as PendingDeletion[];
+  }
+
+  /** @internal */
+  finishDeleteSync(id: number): void {
+    this.connection().prepare('DELETE FROM easyblob_pending_deletions WHERE id = ?').run(id);
+  }
+
+  private callback<T>(
+    operation: () => T,
+    callback: (error: Error | null, value?: T) => void
+  ): void {
+    if (this.closing) {
+      queueMicrotask(() => {
+        try {
+          void Promise.resolve(callback(new Error('Database is closing'))).catch(() => undefined);
+        } catch {
+          /* Application callbacks do not own the database queue. */
         }
+      });
+      return;
+    }
+    const pending = this.callbacks.then(() => this.ready()).then(operation);
+    this.callbacks = pending.then(
+      (value) => {
+        // Observe async callbacks without making resource closure await their returned promise.
+        // In particular, an async callback is allowed to await db.close().
+        void Promise.resolve(callback(null, value)).catch(() => undefined);
+      },
+      (error: Error) => {
+        void Promise.resolve(callback(error)).catch(() => undefined);
       }
     );
+    // A throwing application callback must not poison later database operations.
+    void this.callbacks.catch(() => undefined);
+    this.callbacks = this.callbacks.catch(() => undefined);
   }
 
-  /**
-   * Inserts a new blob record into the database.
-   *
-   * @param originalName - The original filename as uploaded by the user
-   * @param mimeType - The MIME type of the file (e.g., 'image/jpeg')
-   * @param filePath - The filename where the file is stored on disk
-   * @param callback - Callback function with (error, insertedId)
-   *
-   * @example
-   * ```typescript
-   * db.insertBlob('photo.jpg', 'image/jpeg', '1640995200000.jpg', (err, id) => {
-   *   if (err) {
-   *     console.error('Failed to save blob metadata:', err);
-   *   } else {
-   *     console.log('Blob saved with ID:', id);
-   *   }
-   * });
-   * ```
-   */
   insertBlob(
     originalName: string,
     mimeType: string,
     filePath: string,
-    callback: (err: Error | null, id?: number) => void
+    callback: (error: Error | null, id?: number) => void
   ): void {
-    const statement = this.db.prepare(
-      `INSERT INTO blob_metadata(original_name, mime_type, path, upload_timestamp) VALUES(?, ?, ?, ?)`
-    );
+    this.callback(() => this.insertSync(originalName, mimeType, filePath), callback);
+  }
 
-    statement.run(
-      originalName,
-      mimeType,
-      filePath,
-      new Date().toISOString(),
-      function (this: sqlite3.RunResult, err: Error | null) {
-        if (err) {
-          console.error(`Error inserting blob metadata into database: ${err.message}`);
-        } else {
-          console.log(
-            `Inserted blob metadata:`,
-            JSON.stringify({
-              filename: filePath,
-              mimeType: mimeType,
-              originalName: originalName,
-            })
-          );
-        }
-        callback(err, this.lastID);
-        statement.finalize();
-      }
+  getBlob(id: number, callback: (error: Error | null, row?: BlobMetadata) => void): void {
+    this.callback<BlobMetadata | undefined>(() => this.getSync(id), callback);
+  }
+
+  getAllBlobs(callback: (error: Error | null, rows?: BlobMetadata[]) => void): void {
+    this.callback(() => this.listSync(), callback);
+  }
+
+  deleteBlob(id: number, callback: (error: Error | null, deleted?: boolean) => void): void {
+    this.callback(
+      () => this.connection().prepare('DELETE FROM blob_metadata WHERE id = ?').run(id).changes > 0,
+      callback
     );
   }
 
-  /**
-   * Retrieves blob metadata by its unique ID.
-   *
-   * @param id - The unique identifier of the blob to retrieve
-   * @param callback - Callback function with (error, blobMetadata)
-   *
-   * @example
-   * ```typescript
-   * db.getBlob(1, (err, blob) => {
-   *   if (err) {
-   *     console.error('Error fetching blob:', err);
-   *   } else if (blob) {
-   *     console.log('Found blob:', blob.original_name);
-   *   } else {
-   *     console.log('Blob not found');
-   *   }
-   * });
-   * ```
-   */
-  getBlob(id: number, callback: (err: Error | null, row?: BlobMetadata) => void): void {
-    this.db.get(
-      `SELECT * FROM blob_metadata WHERE id = ?`,
-      [id],
-      (err: Error | null, row: BlobMetadata) => {
-        if (err) {
-          console.error(`Error fetching blob with id: ${id}, Error: ${err.message}`);
-        } else if (row) {
-          console.log(`Fetched blob metadata for id ${id}:`, JSON.stringify(row));
-        }
-        callback(err, row);
-      }
-    );
-  }
-
-  /**
-   * Retrieves all blob metadata records from the database.
-   *
-   * Results are ordered by upload timestamp in descending order (newest first).
-   *
-   * @param callback - Callback function with (error, blobMetadataArray)
-   *
-   * @example
-   * ```typescript
-   * db.getAllBlobs((err, blobs) => {
-   *   if (err) {
-   *     console.error('Error fetching blobs:', err);
-   *   } else {
-   *     console.log(`Found ${blobs.length} blobs`);
-   *     blobs.forEach(blob => console.log(blob.original_name));
-   *   }
-   * });
-   * ```
-   */
-  getAllBlobs(callback: (err: Error | null, rows?: BlobMetadata[]) => void): void {
-    this.db.all(
-      `SELECT * FROM blob_metadata ORDER BY upload_timestamp DESC`,
-      [],
-      (err: Error | null, rows: BlobMetadata[]) => {
-        if (err) {
-          console.error(`Error fetching all blobs: ${err.message}`);
-        } else {
-          console.log(`Fetched ${rows.length} blob records`);
-        }
-        callback(err, rows);
-      }
-    );
-  }
-
-  /**
-   * Deletes a blob record from the database by its unique ID.
-   *
-   * Note: This only removes the database record. The physical file must be
-   * deleted separately using filesystem operations.
-   *
-   * @param id - The unique identifier of the blob to delete
-   * @param callback - Callback function with (error, wasDeleted)
-   *
-   * @example
-   * ```typescript
-   * db.deleteBlob(1, (err, deleted) => {
-   *   if (err) {
-   *     console.error('Error deleting blob:', err);
-   *   } else if (deleted) {
-   *     console.log('Blob record deleted successfully');
-   *   } else {
-   *     console.log('Blob record not found');
-   *   }
-   * });
-   * ```
-   */
-  deleteBlob(id: number, callback: (err: Error | null, deleted?: boolean) => void): void {
-    this.db.run(
-      `DELETE FROM blob_metadata WHERE id = ?`,
-      [id],
-      function (this: sqlite3.RunResult, err: Error | null) {
-        if (err) {
-          console.error(`Error deleting blob with id: ${id}, Error: ${err.message}`);
-          callback(err, false);
-        } else {
-          const deleted = this.changes > 0;
-          console.log(`Deleted blob with id ${id}: ${deleted}`);
-          callback(null, deleted);
-        }
-      }
-    );
-  }
-
-  /**
-   * Closes the database connection gracefully.
-   *
-   * This should be called when shutting down the application to ensure
-   * proper cleanup of database resources.
-   *
-   * @example
-   * ```typescript
-   * const db = new Database('./blobs.db');
-   * // ... use database
-   * db.close(); // Clean shutdown
-   * ```
-   */
-  close(): void {
-    if (this.db) {
-      this.db.close((err) => {
-        if (err) {
-          console.error(`Error closing database: ${err.message}`);
-        } else {
-          console.log('Database connection closed.');
-        }
-      });
+  close(): Promise<void> {
+    if (!this.closure) {
+      this.closing = true;
+      this.closure = (async () => {
+        await this.initialization.catch(() => undefined);
+        await this.callbacks;
+        this.db?.close();
+      })();
     }
+    return this.closure;
   }
 }

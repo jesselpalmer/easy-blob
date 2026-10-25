@@ -1,90 +1,54 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+Release dates record publication, not the date a working branch was prepared.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [2.0.0-rc.1] - Unreleased
+
+### Added
+
+- Awaitable readiness, startup and shutdown with application-owned process lifecycle.
+- Mountable Express router for authentication and authorization before all storage routes.
+- Exclusive collision-resistant upload filenames, ownership locks and journal recovery.
+- Persistent database/directory identity pairing; unreferenced bytes preserved for offline inspection.
+- Journaled deletion, safe stored-path validation and read/delete coordination.
+- Isolated real-storage failure/concurrency tests and installed-package CJS, ESM and TypeScript checks.
+- Runnable packaged example, operational guidance, migration guide and adoption-study plan.
+
+### Changed
+
+- Supported runtimes are Node.js 22.23.4+ within 22.x and 24.22.1+ within 24.x.
+- Replaced the unmaintained sqlite3 driver with better-sqlite3 while retaining metadata IDs/schema.
+- Updated runtime and development dependencies and release validation; public declaration dependencies ship.
+- Startup returns a promise and binds loopback by default; no library-installed signal handlers or process exit.
+- Downloads use attachment headers, `application/octet-stream` and `nosniff`.
+- Configuration, IDs, multipart inputs and persisted paths receive stricter validation.
+- README uses the named CommonJS export and documents failure outcomes and deployment responsibilities.
+
+### Fixed
+
+- Same-millisecond uploads could overwrite files with matching extensions.
+- Failed metadata insertion could leave uploaded bytes without deliberate recovery.
+- Database failure during deletion could leave metadata referencing already removed content.
+- Asynchronous initialization failures could escape as uncaught exceptions.
+- Stream failures could attempt a second response after headers were sent.
+- Clean TypeScript consumers lacked the Express declarations required by public types.
+
+See [migration](docs/MIGRATION.md), [operations](docs/OPERATIONS.md) and
+[release verification](docs/RELEASE.md). This entry describes candidate work, not a published release.
 
 ## [1.0.0] - 2025-06-16
 
-### 🎉 Initial Release
+Initial published release with an Express HTTP API for upload, list, download and deletion;
+SQLite metadata; TypeScript declarations; Multer limits/MIME declaration filtering; configurable
+storage/database paths; and CI configured for Linux, macOS and Windows across Node 18/20/22/24.
 
-First stable release of EasyBlob - Quick and easy local blob storage for Node.js applications.
+The release used Express 5.1.0, Multer 2.0.1, sqlite3 5.1.7, TypeScript 5.8.3 and Jest 30.0.0.
+Its original ten tests pass in the recorded 2.0 baseline, but do not establish crash recovery,
+byte integrity under collision, or comprehensive failure handling. The historical README's direct
+CommonJS constructor example was incorrect; the actual package exported named classes.
 
-### ✨ Features
-
-- **Simple HTTP API** for file operations (upload, download, list, delete)
-- **SQLite database** for metadata storage with automatic table initialization
-- **Express 5.x server** with built-in middleware and routing
-- **TypeScript support** with full type definitions
-- **Multer integration** for multipart file uploads
-- **Configurable options** for storage directory, database path, file size limits, and MIME type restrictions
-- **Graceful shutdown** handling for production deployments
-- **Cross-platform compatibility** with proper line ending handling
-
-### 🔧 Configuration Options
-
-- `storageDir`: Custom upload directory (default: `./uploads`)
-- `dbPath`: SQLite database file path (default: `./blob-storage.db`)
-- `maxFileSize`: File size limit in bytes (default: 10MB)
-- `allowedMimeTypes`: Array of allowed MIME types (default: all types)
-
-### 📡 API Endpoints
-
-- `POST /upload` - Upload files with multipart/form-data
-- `GET /files` - List all uploaded files with metadata
-- `GET /blob/:id` - Download file by ID
-- `DELETE /blob/:id` - Delete file and metadata by ID
-
-### 🛡️ Security & Quality
-
-- **Zero vulnerabilities** - All dependencies updated to latest secure versions
-- **Comprehensive test suite** - 10/10 tests passing with Jest 30.x
-- **Code quality** - Prettier formatting, Markdown linting, TypeScript strict mode
-- **Error handling** - Proper HTTP status codes and error responses
-- **File validation** - MIME type filtering and size limits
-
-### 🏗️ Technical Stack
-
-- **Express**: 5.1.0 (latest stable)
-- **Multer**: 2.0.1 (latest with security fixes)
-- **SQLite3**: 5.1.7
-- **TypeScript**: 5.8.3
-- **Jest**: 30.0.0
-- **Node.js**: Compatible with 18.x, 20.x, 22.x, 24.x
-
-### 🚀 Installation
-
-```bash
-npm install @jesselpalmer/easy-blob
-```
-
-### 📖 Documentation
-
-- Complete TypeScript examples in README
-- JSDoc comments throughout codebase
-- API endpoint documentation with examples
-- Configuration options with defaults
-
-### 🧪 Testing
-
-- Comprehensive test coverage for all API endpoints
-- File upload/download testing
-- Error handling validation
-- Cross-platform CI/CD with GitHub Actions
-
----
-
-## Package Information
-
-**Package Name**: `@jesselpalmer/easy-blob`  
-**License**: MIT  
-**Repository**: <https://github.com/jesselpalmer/easy-blob>  
-**Issues**: <https://github.com/jesselpalmer/easy-blob/issues>
-
-### Badges
-
-[![CI](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml/badge.svg)](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml)
-[![npm version](https://badge.fury.io/js/@jesselpalmer%2Feasy-blob.svg)](https://www.npmjs.com/package/@jesselpalmer/easy-blob)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+Earlier release notes described “zero vulnerabilities,” comprehensive validation and production
+shutdown readiness. Those were broader than the evidence supports. Dependency results are dated,
+MIME filtering does not validate bytes, and the initial shutdown implementation registered process
+handlers and exited without an awaited database closure. The 2.0 assessment records these limitations
+without changing the release's historical version or publication date.
