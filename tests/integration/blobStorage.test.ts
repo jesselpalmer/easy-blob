@@ -3,8 +3,8 @@ import express from 'express';
 import { mkdtemp, readdir, rm, unlink } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { BlobStorage, BlobStorageOptions } from '../src/blob-storage';
-import { LocalStore } from '../src/store';
+import { BlobStorage, BlobStorageOptions } from '../../src';
+import { LocalStore } from '../../src/store';
 
 interface Fixture {
   root: string;

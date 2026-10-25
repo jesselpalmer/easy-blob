@@ -1,19 +1,11 @@
 import express, { Application, Request, Response, Router } from 'express';
 import multer from 'multer';
-import path from 'node:path';
 import { Server } from 'node:http';
 import { pipeline } from 'node:stream/promises';
 import { LocalStore } from './store';
+import { BlobStorageOptions, normalizeOptions, parseBlobId } from './validation';
 
-export interface BlobStorageOptions {
-  storageDir?: string;
-  dbPath?: string;
-  maxFileSize?: number;
-  /** Client-declared MIME allowlist; this does not inspect file contents. */
-  allowedMimeTypes?: string[];
-  /** Grace period before active HTTP streams are cancelled. Defaults to 5000ms. */
-  shutdownTimeoutMs?: number;
-}
+export type { BlobStorageOptions } from './validation';
 export interface UploadResponse {
   id: number;
   message: string;
@@ -55,44 +47,10 @@ export class BlobStorage {
   private closed?: Promise<void>;
 
   constructor(options: BlobStorageOptions = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options)) {
-      throw new TypeError('options must be an object');
-    }
-    for (const key of ['storageDir', 'dbPath'] as const) {
-      const value = options[key];
-      if (
-        value !== undefined &&
-        (typeof value !== 'string' || !value.trim() || value.includes('\0'))
-      ) {
-        throw new TypeError(`${key} must be a non-empty path`);
-      }
-    }
-    for (const key of ['maxFileSize', 'shutdownTimeoutMs'] as const) {
-      const value = options[key];
-      if (value !== undefined && (!Number.isSafeInteger(value) || value <= 0)) {
-        throw new TypeError(`${key} must be a positive safe integer`);
-      }
-    }
-    if (options.dbPath === ':memory:')
-      throw new TypeError('BlobStorage requires a persistent database');
-    if (options.shutdownTimeoutMs !== undefined && options.shutdownTimeoutMs > 2147483647) {
-      throw new TypeError('shutdownTimeoutMs exceeds the timer limit');
-    }
-    const allowed = options.allowedMimeTypes === undefined ? [] : options.allowedMimeTypes;
-    if (
-      !Array.isArray(allowed) ||
-      allowed.some(
-        (value) => typeof value !== 'string' || !/^[\w!#$&^.+-]+\/[\w!#$&^.+-]+$/.test(value)
-      )
-    ) {
-      throw new TypeError('allowedMimeTypes must be an array of MIME types');
-    }
-    const allowedMimeTypes = [...allowed];
-    this.shutdownTimeoutMs = options.shutdownTimeoutMs ?? 5000;
-    this.store = new LocalStore(
-      path.resolve(options.storageDir ?? './uploads'),
-      path.resolve(options.dbPath ?? './blob-storage.db')
-    );
+    const config = normalizeOptions(options);
+    const allowedMimeTypes = config.allowedMimeTypes;
+    this.shutdownTimeoutMs = config.shutdownTimeoutMs;
+    this.store = new LocalStore(config.storageDir, config.dbPath);
     this.initialization = this.store.ready();
     // The caller may await ready later; a rejected initialization must never become unhandled.
     void this.initialization.catch(() => undefined);
@@ -119,7 +77,7 @@ export class BlobStorage {
           store.discardUpload(file.filename).then(() => callback(null), callback);
         },
       },
-      limits: { fileSize: options.maxFileSize ?? 10 * 1024 * 1024, files: 1, fields: 0, parts: 2 },
+      limits: { fileSize: config.maxFileSize, files: 1, fields: 0, parts: 2 },
       fileFilter(_req, file, callback) {
         if (allowedMimeTypes.length && !allowedMimeTypes.includes(file.mimetype)) {
           callback(new InvalidUpload('File type not allowed'));
@@ -183,16 +141,9 @@ export class BlobStorage {
   }
 
   private id(req: Request, res: Response): number | undefined {
-    const value = req.params.id;
-    if (
-      typeof value !== 'string' ||
-      !/^[1-9]\d*$/.test(value) ||
-      !Number.isSafeInteger(Number(value))
-    ) {
-      res.status(400).json({ error: 'Invalid blob ID' });
-      return undefined;
-    }
-    return Number(value);
+    const id = parseBlobId(req.params.id);
+    if (id === undefined) res.status(400).json({ error: 'Invalid blob ID' });
+    return id;
   }
 
   private routes(): void {
@@ -205,9 +156,15 @@ export class BlobStorage {
         try {
           try {
             await new Promise<void>((resolve, reject) => {
-              this.upload.single('blob')(req, res, (error: unknown) =>
-                error ? reject(error) : resolve()
-              );
+              this.upload.single('blob')(req, res, (error: unknown) => {
+                if (!error) resolve();
+                else
+                  reject(
+                    error instanceof Error
+                      ? error
+                      : new Error('Upload middleware failed', { cause: error })
+                  );
+              });
             });
           } catch (error) {
             if (

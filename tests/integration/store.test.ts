@@ -4,8 +4,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 import BetterSqlite3 from 'better-sqlite3';
-import { Database } from '../src/database';
-import { LocalStore } from '../src/store';
+import { Database } from '../../src/database';
+import { LocalStore } from '../../src/store';
 
 let directory: string;
 let stores: LocalStore[];

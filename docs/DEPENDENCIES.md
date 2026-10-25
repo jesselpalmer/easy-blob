@@ -68,6 +68,19 @@ Multer declarations 2.3.0, better-sqlite3 declarations 9.6.0, Supertest 7.3.1,
 Supertest declarations 7.2.1, Prettier 3.9.10 and markdownlint-cli 0.50.0 were also reviewed and updated.
 The lockfile refresh updates transitive dependencies inside their supported ranges.
 
+The follow-up quality audit adds ESLint 10.13.0, `@eslint/js` 10.0.1, typescript-eslint 8.72.0
+and globals 17.13.0 as development dependencies only. Their declared Node engines include both
+supported runtimes; typescript-eslint supports ESLint 10 and TypeScript `>=4.8.4 <6.1.0`.
+This is an additional reason to retain TypeScript 5.9.3. Production TypeScript receives the
+recommended type-checked rules; test/fixture TypeScript receives recommended syntax rules, while
+Jest and the isolated consumer compiler check its types. Scripts and examples receive recommended
+JavaScript rules. Configuration follows the official
+[typed-linting guidance](https://typescript-eslint.io/getting-started/typed-linting/) and
+[ESLint flat configuration](https://eslint.org/docs/latest/use/configure/configuration-files).
+Formatting is a separate Prettier check, including examples, consumer fixtures and configuration.
+The post-install dependency audit still reports zero runtime findings and the same four low
+development records described below; `npm ls --depth=0` reports no invalid direct dependencies.
+
 GitHub Actions use checkout 7.0.1, setup-node 7.1.0 and action-gh-release 3.0.3.
 Ordinary branch and pull-request validation cannot publish. Release automation requires a `v*` tag
 that matches the package version, runs the same verification, and publishes prereleases to npm's `next`

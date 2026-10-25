@@ -23,14 +23,18 @@
     "prepublishOnly": "npm run check",
     "test": "jest --runInBand",
     "test:coverage": "jest --runInBand --coverage",
-    "test:package": "npm run build && node scripts/verify-package.cjs",
+    "test:package": "npm run test:e2e",
     "lint:md": "markdownlint \"*.md\" \"docs/**/*.md\" \"examples/**/*.md\"",
     "lint:md:fix": "markdownlint --fix \"*.md\" \"docs/**/*.md\" \"examples/**/*.md\"",
-    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\" \"scripts/**/*.cjs\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\" \"scripts/**/*.cjs\"",
-    "lint": "npm run lint:md && npm run format:check",
-    "check": "npm run build && npm run lint && npm test && node scripts/verify-package.cjs",
-    "audit:runtime": "npm audit --omit=dev"
+    "format": "prettier --write \"{src,tests,scripts,examples}/**/*.{ts,cts,mts,js,cjs,mjs,json}\" \"*.{js,cjs,mjs,json}\" \".github/**/*.yml\" .prettierrc .markdownlint.json",
+    "format:check": "prettier --check \"{src,tests,scripts,examples}/**/*.{ts,cts,mts,js,cjs,mjs,json}\" \"*.{js,cjs,mjs,json}\" \".github/**/*.yml\" .prettierrc .markdownlint.json",
+    "lint": "npm run lint:code && npm run lint:md && npm run format:check",
+    "check": "npm run build && npm run lint && npm run test:coverage && node scripts/verify-package.cjs",
+    "audit:runtime": "npm audit --omit=dev",
+    "test:unit": "jest --runInBand --selectProjects unit",
+    "test:integration": "jest --runInBand --selectProjects integration",
+    "test:e2e": "npm run build && node scripts/verify-package.cjs",
+    "lint:code": "eslint . --max-warnings=0"
   },
   "repository": {
     "type": "git",
@@ -61,16 +65,20 @@
     "multer": "^2.5.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^9.6.0",
     "@types/jest": "^30.0.0",
     "@types/multer": "^2.3.0",
     "@types/supertest": "^7.2.1",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
     "jest": "^30.5.2",
     "markdownlint-cli": "^0.50.0",
     "prettier": "^3.9.10",
     "supertest": "^7.3.1",
     "ts-jest": "^29.4.15",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.0"
   },
   "engines": {
     "node": "^22.23.4 || ^24.22.1"

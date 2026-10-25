@@ -2,7 +2,29 @@
 
 Candidate: **2.0.0-rc.1**. Reviewed October 24, 2026. Recommended stable version: **2.0.0**.
 Starting commit: `f99d39107c97a33c76edadcbc7801ff9f48a9803`.
-No npm publication, release tag or merge has been performed.
+The initial work was merged by the maintainer in
+[#22](https://github.com/jesselpalmer/easy-blob/pull/22) at
+`3697b5184f11a036d7b5f95625543340f5566aa4`. This follow-up does not publish or tag a release.
+
+## Quality audit follow-up
+
+The follow-up in [#23](https://github.com/jesselpalmer/easy-blob/issues/23) adds actual ESLint checks,
+formats maintained code/configuration, separates 84 pure unit cases from the retained 88 integration
+cases, and adds five separate-process HTTP E2E scenarios against the installed tarball. CJS/ESM,
+strict TypeScript, fresh/locked installation and existing packaged example checks remain in place.
+See [architecture and testing](TESTING.md) for commands, boundaries and coverage gates.
+
+On Linux / Node 22.23.4 and 24.22.1, the complete check passed locally, including all five
+process scenarios. The local native-header workaround documented below was retained.
+Measured Jest coverage is 89.42% statements, 82.38% branches, 86.76% functions and 91.51% lines.
+The production audit reports zero findings; the full audit retains the same four low development
+records from one KaTeX advisory. ESLint's declared peers and `npm ls --depth=0` are consistent.
+The current follow-up PR checks provide the OS/runtime evidence; the earlier seven-job run below
+belongs to the initial implementation, not this follow-up. Coverage now runs in each of the six
+matrix jobs as part of `npm run check`.
+
+The remaining sections preserve the initial release-readiness evidence and independent reviews.
+Their earlier test counts and coverage policy describe that revision.
 
 ## Baseline and reproducibility
 
@@ -15,8 +37,8 @@ The actual published 1.0.0 tarball was inspected. Named CommonJS/ESM exports wor
 direct constructor import failed, and a strict clean TypeScript consumer failed on missing Express
 declarations. The confirmed source defects are recorded in [the assessment](ASSESSMENT.md).
 
-Run `npm ci` followed by `npm run check` to reproduce candidate build, formatting/Markdown checks,
-integration tests and installed-tarball consumers. `npm run test:coverage` supplies coverage;
+Run `npm ci` followed by `npm run check` to reproduce build, code/Markdown/formatting checks,
+unit/integration coverage gates and installed-tarball E2E. `npm run test:coverage` runs coverage alone;
 `npm audit --omit=dev` and `npm audit` distinguish runtime and complete dependency findings.
 
 ## Local results
@@ -35,7 +57,8 @@ integration tests and installed-tarball consumers. `npm run test:coverage` suppl
 | Runtime dependency audit | No known advisories reported on review date |
 | Complete dependency audit | Four low records from one development-only KaTeX advisory; see dependency decision |
 
-Coverage is diagnostic, not a release threshold or proof of correctness. Residual branches include
+At the initial revision coverage was diagnostic, not a release threshold. The follow-up adds
+regression floors; neither percentages nor passing tests are proof of correctness. Residual branches include
 exceptional configuration, corrupted identity/schema and resource-cleanup errors. Fault tests target
 material user contracts rather than attempting to simulate every operating-system failure.
 
@@ -80,7 +103,7 @@ The HTTP error-header and example-shutdown findings have retained regression che
 
 ## CI evidence and remaining limits
 
-The GitHub CI matrix runs Node 22/24 on Ubuntu, Windows Server 2022 and macOS, plus a coverage job.
+The initial GitHub CI matrix ran Node 22/24 on Ubuntu, Windows Server 2022 and macOS, plus a coverage job.
 All seven jobs passed in [CI run 34](https://github.com/jesselpalmer/easy-blob/actions/runs/40167330150)
 for source commit `0a6b00010c0c59250357b2fc273560b87b550fad`: six supported OS/runtime entries and coverage.
 Each matrix entry ran clean installation, the complete check including tarball reinstall/consumers,

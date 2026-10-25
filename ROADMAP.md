@@ -34,6 +34,15 @@ Scope: one local owner of a storage directory and SQLite metadata file. Preserve
 IDs and metadata where safe. Breaking lifecycle, security and runtime changes require 2.0 migration notes.
 No distributed storage, cloud adapters, admin UI, background service or speculative framework layer.
 
+## Quality audit follow-up
+
+[#23](https://github.com/jesselpalmer/easy-blob/issues/23): add production code linting,
+format maintained code and configuration, separate pure unit and real integration suites,
+and exercise cleanly installed packages from a separate client process. Preserve the existing
+storage and lifecycle contracts and verify every layer through the supported CI matrix.
+Status: implemented; complete local checks pass on Node 22/24. The follow-up PR tracks CI verification.
+See [testing architecture](docs/TESTING.md).
+
 ## Adoption validation
 
 Outcome: five independent developers integrate the candidate into real local tools, small applications

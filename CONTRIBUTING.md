@@ -11,10 +11,15 @@ npm ci
 npm run check
 ```
 
-`check` builds declarations/JavaScript, lints Markdown and formatting, runs isolated integration
-tests, packs the library, installs it into a temporary clean consumer, and verifies CJS, ESM,
-TypeScript and the packaged examples. It does not publish anything. `npm run test:coverage` helps
-identify untested branches; critical failure contracts matter more than a headline percentage.
+`check` builds declarations/JavaScript, runs ESLint, Markdown lint and formatting checks, enforces
+unit/integration coverage floors, then installs the tarball into a temporary clean consumer and
+runs CJS, ESM, TypeScript, example and separate-process HTTP checks. It does not publish anything.
+See [testing architecture and commands](docs/TESTING.md) for the layers, coverage policy and limits.
+
+Use `npm run test:unit` for pure input-policy tests, `npm run test:integration` for real local
+resources, and `npm run test:e2e` for installed-package checks. `npm test` runs unit and integration
+projects together; `npm run check` is the complete CI/release gate. Run `npm run format` to apply the
+repository's formatting to code, examples, tests and configuration. Markdown uses `npm run lint:md`.
 
 Tests use real temporary directories, real SQLite and HTTP with explicit cleanup. Do not use shared
 project data paths, arbitrary sleeps, forced Jest exit or ignored close failures to conceal leaks.
