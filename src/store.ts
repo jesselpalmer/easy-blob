@@ -7,40 +7,12 @@ import path from 'node:path';
 import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { BlobMetadata, Database } from './database';
+import { validateFilename, validateMetadata } from './validation';
 
 const MANAGED = /^easyblob-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.blob$/;
 
 function isMissing(error: unknown): boolean {
   return (error as NodeJS.ErrnoException).code === 'ENOENT';
-}
-
-/** Reject path syntax on every supported OS, including Windows alternate streams. */
-function validateFilename(name: unknown): asserts name is string {
-  if (
-    typeof name !== 'string' ||
-    name.length === 0 ||
-    name.length > 255 ||
-    name.startsWith('.') ||
-    /[\\/:*?"<>|\x00-\x1f\x7f]/.test(name) ||
-    /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(name) ||
-    name.endsWith('.') ||
-    name.endsWith(' ')
-  ) {
-    throw new Error('Invalid persisted blob path');
-  }
-}
-
-function validateMetadata(row: BlobMetadata): void {
-  validateFilename(row.path);
-  if (
-    !Number.isSafeInteger(row.id) ||
-    row.id <= 0 ||
-    typeof row.original_name !== 'string' ||
-    typeof row.mime_type !== 'string' ||
-    typeof row.upload_timestamp !== 'string'
-  ) {
-    throw new Error('Invalid persisted blob metadata');
-  }
 }
 
 /** Internal local filesystem/SQLite coordinator. One owner per storage directory and database. */
@@ -104,7 +76,9 @@ export class LocalStore {
           await fs.mkdir(lockPath, { mode: 0o700 });
         } catch (error) {
           if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
-            throw new Error(`Storage is already owned or has a stale lock: ${lockPath}`);
+            throw new Error(`Storage is already owned or has a stale lock: ${lockPath}`, {
+              cause: error,
+            });
           }
           throw error;
         }
@@ -238,7 +212,7 @@ export class LocalStore {
     return pending;
   }
 
-  private mutate<T>(operation: () => Promise<T>): Promise<T> {
+  private mutate<T>(operation: () => T | Promise<T>): Promise<T> {
     return this.work(() => {
       const pending = this.mutations.then(operation);
       this.mutations = pending.then(
@@ -299,7 +273,7 @@ export class LocalStore {
   }
 
   list(): Promise<BlobMetadata[]> {
-    return this.mutate(async () => {
+    return this.mutate(() => {
       const rows = this.db!.listSync();
       rows.forEach(validateMetadata);
       return rows;
@@ -359,7 +333,8 @@ export class LocalStore {
       if (!metadata) return false;
       validateMetadata(metadata);
       await this.assertRegularFile(metadata.path, true);
-      await Promise.all(this.readers.get(id) || []);
+      const readers = this.readers.get(id);
+      if (readers) await Promise.all(readers);
       const pending = this.db!.beginDeleteSync(id);
       if (!pending) return false;
       await this.unlinkFile(pending.path);

@@ -5,8 +5,8 @@ import { AddressInfo } from 'node:net';
 import { mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { BlobStorage, BlobStorageOptions } from '../src/blob-storage';
-import { LocalStore } from '../src/store';
+import { BlobStorage, BlobStorageOptions } from '../../src';
+import { LocalStore } from '../../src/store';
 
 const directories: string[] = [];
 const storages: BlobStorage[] = [];

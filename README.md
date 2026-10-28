@@ -251,6 +251,7 @@ or complete metadata.
 - [Roadmap and issues](ROADMAP.md)
 - [Starting-state assessment](docs/ASSESSMENT.md)
 - [Dependency decisions](docs/DEPENDENCIES.md)
+- [Architecture, test layers and quality checks](docs/TESTING.md)
 - [Migration guide](docs/MIGRATION.md) and [changelog](CHANGELOG.md)
 - [Contributor checks](CONTRIBUTING.md), [security reporting](SECURITY.md), [release checklist](docs/RELEASE.md)
 - [Five-developer adoption study](docs/ADOPTION.md)
