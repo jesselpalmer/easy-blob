@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
-const { mkdtemp, rm } = require('node:fs/promises');
+const { mkdtemp, readFile, writeFile, rm } = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const { createInterface } = require('node:readline');
@@ -37,6 +37,28 @@ async function environment(t) {
     }
   });
   return {
+    directory,
+    async runClient(base, filePath, downloadPath, token) {
+      const env = { ...process.env, NODE_PATH: '', EASYBLOB_URL: base };
+      delete env.EASYBLOB_TOKEN;
+      if (token !== undefined) env.EASYBLOB_TOKEN = token;
+      const child = spawn(
+        process.execPath,
+        [require.resolve('@jesselpalmer/easy-blob/examples/client.mjs'), filePath, downloadPath],
+        { cwd: directory, env, stdio: ['ignore', 'pipe', 'pipe'] }
+      );
+      let stdout = '';
+      let stderr = '';
+      child.stdout.on('data', (data) => (stdout += data));
+      child.stderr.on('data', (data) => (stderr += data));
+      const exited = new Promise((resolve, reject) => {
+        child.once('error', reject);
+        child.once('close', (code, signal) => resolve({ code, signal }));
+      });
+      children.push({ child, exited });
+      const status = await deadline(exited, 'documented client exit', 15_000);
+      return { ...status, stdout, stderr };
+    },
     launch(file, { token, ipc = false, port = '0' } = {}) {
       const env = {
         ...process.env,
@@ -218,6 +240,32 @@ for (const token of [undefined, 'process-test-token']) {
         }
       }
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      // Execute the shipped client in its own process, exactly as documented.
+      // Use a real binary file and paths containing spaces; never assume blob ID 1.
+      const original = Buffer.from([0, 13, 10, 127, 128, 254, 255]);
+      const input = path.join(env.directory, 'input file.bin');
+      const output = path.join(env.directory, 'downloaded file.bin');
+      await writeFile(input, original);
+      const client = await env.runClient(base, input, output, token);
+      assert.equal(client.code, 0, client.stderr);
+      assert.equal(client.signal, null);
+      assert.match(client.stdout, /Uploaded input file.bin as blob \d+/);
+      assert.match(client.stdout, /Downloaded 7 matching bytes/);
+      assert.match(client.stdout, /Deleted blob \d+/);
+      assert.deepEqual(await readFile(output), original);
+      assert.deepEqual(await (await request(base, '/files', { headers })).json(), []);
+      const existingOutput = await env.runClient(base, input, output, token);
+      assert.equal(existingOutput.code, 1);
+      assert.match(existingOutput.stderr, /EEXIST/);
+      assert.deepEqual(await readFile(input), original);
+      assert.deepEqual(await readFile(output), original);
+      assert.deepEqual(await (await request(base, '/files', { headers })).json(), []);
+      if (token) {
+        const deniedClient = await env.runClient(base, input, output, 'wrong-token');
+        assert.equal(deniedClient.code, 1);
+        assert.match(deniedClient.stderr, /HTTP 401/);
+        assert.deepEqual(await (await request(base, '/files', { headers })).json(), []);
+      }
       const bytes = Buffer.from('CLI upload bytes');
       const id = await upload(base, bytes, headers);
       await download(base, id, bytes, headers);

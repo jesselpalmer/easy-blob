@@ -35,6 +35,8 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm audit --omit=dev --audit-level=high
+      - name: Audit development tooling (tracked low findings only)
+        run: npm audit --audit-level=moderate
       - name: Publish validated package
         run: npm publish --access public --tag '${{ steps.version.outputs.tag }}'
         env:

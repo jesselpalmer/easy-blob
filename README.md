@@ -84,6 +84,41 @@ Restarting with the same storage and database paths retains files that have not 
 The [complete runnable example](examples/server.cjs) includes configurable paths, protected mounting
 and shutdown; the package checks execute that example after installing the tarball.
 
+### Use it from a client application
+
+The server owns storage; clients use its HTTP API. No EasyBlob import or extra HTTP library is
+needed in a client. With the server above running, use the packaged
+[JavaScript client](examples/client.mjs) from a second terminal:
+
+```sh
+node node_modules/@jesselpalmer/easy-blob/examples/client.mjs ./myfile.pdf ./downloaded.pdf
+```
+
+It uploads the actual file in the `blob` multipart field, uses the returned ID to find it in the
+listing, downloads and compares the exact bytes, saves a local copy, then deletes its remote upload.
+The input stays untouched, the download remains on disk, and an existing output file is never
+overwritten. This is a small-file demonstration: it buffers the file in memory and the default
+server upload limit is 10 MiB. The [walkthrough](examples/README.md) covers sample input,
+authenticated requests and custom URLs, including a mounted `/storage` prefix.
+
+For example, the upload request itself is:
+
+```js
+const form = new FormData();
+form.append('blob', new Blob(['Hello from my application']), 'hello.txt');
+const response = await fetch('http://127.0.0.1:3000/upload', {
+  method: 'POST',
+  body: form,
+});
+if (!response.ok) throw new Error(`Upload failed: HTTP ${response.status}`);
+const { id } = await response.json();
+console.log(`Download URL: http://127.0.0.1:3000/blob/${id}`);
+```
+
+Let `fetch` set the multipart `Content-Type` boundary. The complete client checks responses,
+sets request deadlines, handles authentication and cleans up its own upload after a download failure.
+If the upload response is lost, its outcome is uncertain; retrying can create another blob.
+
 ### JavaScript modules and TypeScript
 
 CommonJS uses the named export shown above. Native JavaScript ESM (`.mjs`) uses:
