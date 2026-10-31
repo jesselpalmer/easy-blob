@@ -4,7 +4,74 @@ Reviewed October 24, 2026 for the 2.0.0-rc.1 candidate. Registry metadata, the a
 1.0.0 tarball and upstream documentation were checked; versions below are observations from that review.
 The committed lockfile records the exact resolved dependency tree.
 
-## Runtime and compatibility
+## October 31, 2026 follow-up
+
+The original review below is historical. Fresh registry metadata and full/runtime audits were checked
+again after PR #24 merged. Runtime direct dependencies are already on their current supported stable
+versions. Compatible updates include ESLint 10.14.0, typescript-eslint 8.72.1, qs 6.17.1 and other
+transitive fixes in the lockfile. TypeScript 5.9.3 and Node declarations 22.20.5 remain intentional
+compatibility choices; registry `latest` is not a reason to break their peer/runtime policy.
+
+The new full audit initially reported 35 affected records: 3 high, 26 moderate and 6 low. A record
+count includes parent packages affected through a dependency; it is not a count of distinct defects.
+The high RE2JS finding and moderate minimatch/glob findings are development-only. The runtime
+`npm audit --omit=dev` still reports zero findings.
+
+### Temporary development security overrides
+
+| Dependency | Validated override | Reason and scope |
+| --- | --- | --- |
+| minimatch | 11.0.3 | Fix globparts amplification (GHSA-g3hv-75wg-m249); used by lint/test file matching. |
+| glob | 14.0.3 | Fix cancellation bypass (GHSA-3g3m-2fjr-6pw4); used by Jest/coverage tooling. |
+| markdownlint → re2js | 2.8.7 | First patched release for lookbehind denial of service (GHSA-gg6h-894w-4m9c); parent pins affected 2.8.6. |
+
+These exact overrides intentionally bypass the parents' published ranges. Glob and minimatch cross
+major versions; their Node engines include our supported runtimes, and their consumed CommonJS/ESM
+APIs remain available. Local checks compare the actual Markdown/source glob results, ESLint file
+selection and Jest test discovery before/after the overrides. The complete check verifies lint,
+all 172 unit/integration cases, unchanged coverage and real installed consumers. Hosted CI must also
+pass the Node/OS matrix before merging. These are tested development-tool choices, not an assumption
+that arbitrary major overrides are compatible. No runtime dependency uses these overrides.
+
+The resulting audit reports **zero runtime findings, zero high/moderate findings and ten low
+records from two root advisories**:
+
+- [KaTeX GHSA-238p-pmpm-9mq7](https://github.com/advisories/GHSA-238p-pmpm-9mq7):
+  four records through Markdown tooling. The parser still requires KaTeX `^0.16.0`, while the fix
+  starts at 0.18.2. EasyBlob does not render KaTeX or ship it to runtime consumers. Keep the reviewed
+  exposure until upstream adopts a patched compatible range; no unvalidated KaTeX major override.
+- [deepmerge GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4):
+  six records through Jest/ts-jest. Registry latest 4.3.1 is affected; no patched release is published.
+  Jest uses it to merge repository-controlled test configuration, not uploaded blob data. Do not feed
+  untrusted data into that configuration. Downgrading Jest to npm audit's obsolete suggested release
+  is not a suitable fix.
+
+Follow-up [#25](https://github.com/jesselpalmer/easy-blob/issues/25) tracks both low advisories and
+removal of each override once upstream adopts the security fix. CI and release validation now fail
+on moderate-or-higher full-audit findings, in addition to the runtime high/critical gate. Low findings
+remain visible in audit output. Weekly Dependabot groups compatible runtime and development updates
+separately; compiler and Node-declaration majors require a deliberate compatibility review.
+
+The seven old dependency PRs target changes already incorporated or removed in merged PR #22:
+
+| PR | Proposed change | Current lockfile evidence |
+| --- | --- | --- |
+| #9 | Multer 2.0.2 | Multer 2.5.0 |
+| #10 | form-data 4.0.4 | form-data 4.0.6 (development only) |
+| #11 | tar-fs 2.1.4 | tar-fs absent after SQLite driver replacement |
+| #12 | js-yaml 3.14.2 / 4.1.1 | js-yaml 3.15.2 / 5.5.0 |
+| #13 | body-parser 2.2.1 | body-parser 2.4.0 |
+| #14 | Express 5.2.0 | Express 5.3.0 |
+| #16 | qs 6.14.2 | qs 6.17.1 (6.16.1 already present when #22 merged) |
+
+They are superseded; merging their old lockfiles would not provide additional fixes.
+The remaining native-install limitation is still documented below. Local installation again needed
+matching official Node headers extracted without ownership changes because of the sandbox `fchown`
+error. This is an environment workaround, not a disabled install script or a package requirement.
+
+## Original October 24 review
+
+### Runtime and compatibility
 
 Support maintained Node.js LTS 22 and 24, using security patch floors 22.23.4 and 24.22.1.
 `engines`, CI and the examples use this policy. Node 18 and 20 are end of life; Node 26 is Current
@@ -107,7 +174,7 @@ Audit results describe the advisory
 database at execution time, not a guarantee of absence of security defects. CI fails on reported high
 or critical runtime findings. Maintainers should also review the complete audit before each release.
 
-The open dependency PRs [#9](https://github.com/jesselpalmer/easy-blob/pull/9),
+The historical dependency PRs [#9](https://github.com/jesselpalmer/easy-blob/pull/9),
 [#10](https://github.com/jesselpalmer/easy-blob/pull/10),
 [#11](https://github.com/jesselpalmer/easy-blob/pull/11),
 [#12](https://github.com/jesselpalmer/easy-blob/pull/12),
@@ -115,7 +182,7 @@ The open dependency PRs [#9](https://github.com/jesselpalmer/easy-blob/pull/9),
 [#14](https://github.com/jesselpalmer/easy-blob/pull/14) and
 [#16](https://github.com/jesselpalmer/easy-blob/pull/16) overlap this work.
 Their target versions have been superseded by later fixes or removed dependency chains.
-They should be reconciled after the candidate is merged, rather than merged blindly into the refreshed lockfile.
+The October 31 follow-up above records their reconciliation; do not merge their old lockfiles.
 
 ## Artifact verification
 

@@ -27,6 +27,7 @@ and attachment-only binary downloads. Read [the migration guide](MIGRATION.md) b
 - [x] `npm ci` succeeds from the committed lockfile on supported platforms/runtimes.
 - [x] `npm run check` passes, including clean installed CJS, ESM and strict TypeScript consumers.
 - [x] The actual packaged examples complete upload/list/download/delete and protected-route checks.
+- [x] The packaged client runs separately, saves matching bytes, avoids local overwrites and cleans up its own upload.
 - [x] Real text and binary downloads match uploaded bytes; restart and legacy-data fixtures pass.
 - [x] Collision, filesystem/database failure, cancellation, recovery and read/delete races pass.
 - [x] Startup failure, protected middleware ordering and repeated shutdown leave no owned resources.
@@ -46,6 +47,8 @@ item is not evidence of failure by itself; it requires a recorded result before 
    lockfile versions, changelog date and README installation instructions consistently.
 3. Rerun required checks and inspect `npm pack --dry-run`; exclude local data, credentials and artifacts.
 4. Review GitHub Actions results, permissions, npm token availability and tag/version agreement.
+   Both runtime and full audits must satisfy CI thresholds; review remaining low development
+   advisories and temporary overrides in [#25](https://github.com/jesselpalmer/easy-blob/issues/25).
 5. Merge only after authorization. Create and push the matching `v<package-version>` tag only when
    publication is explicitly authorized; the release workflow can publish on that tag.
 6. Verify the registry artifact and release notes after publication, using a clean install.

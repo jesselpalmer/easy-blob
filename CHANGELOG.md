@@ -13,12 +13,17 @@ Release dates record publication, not the date a working branch was prepared.
 - Journaled deletion, safe stored-path validation and read/delete coordination.
 - Isolated real-storage failure/concurrency tests and installed-package CJS, ESM and TypeScript checks.
 - Runnable packaged example, operational guidance, migration guide and adoption-study plan.
+- Packaged HTTP client walkthrough with byte verification, protected-mount usage and cleanup;
+  exercised in separate processes against the installed artifact.
+- Weekly grouped dependency maintenance and a CI/release gate for moderate development advisories.
 
 ### Changed
 
 - Supported runtimes are Node.js 22.23.4+ within 22.x and 24.22.1+ within 24.x.
 - Replaced the unmaintained sqlite3 driver with better-sqlite3 while retaining metadata IDs/schema.
 - Updated runtime and development dependencies and release validation; public declaration dependencies ship.
+- Refreshed compatible dependencies and validated temporary development security overrides;
+  remaining low KaTeX/deepmerge findings are tracked in issue #25.
 - Startup returns a promise and binds loopback by default; no library-installed signal handlers or process exit.
 - Downloads use attachment headers, `application/octet-stream` and `nosniff`.
 - Configuration, IDs, multipart inputs and persisted paths receive stricter validation.

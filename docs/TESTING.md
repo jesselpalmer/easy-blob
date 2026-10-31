@@ -14,6 +14,7 @@ tracked in [#23](https://github.com/jesselpalmer/easy-blob/issues/23).
 | `src/database.ts` | Fixed SQL, transactions and callback compatibility | Rollback, legacy schema, IDs and callback lifecycle |
 | `src/validation.ts` | Pure option, ID, filename and metadata policy | Unit tests with no filesystem, server or database |
 | `examples/server.cjs` | Application-owned configuration, authentication and signals | Installed example API and actual CLI process |
+| `examples/client.mjs` | User-facing upload/list/download/delete walkthrough | Installed client process against standalone/protected servers; binary verification and cleanup |
 | `scripts/verify-package.cjs` | Artifact allowlist, clean install/reinstall and consumer orchestration | Actual npm tarball outside the checkout |
 
 The existing layers suit a single local owner and small workloads. Input policy is separated from
@@ -54,7 +55,9 @@ used in these scenarios:
   list, reject invalid IDs/missing uploads/oversize input, close, restart, verify persistence,
   delete, restart again and verify the deletions persisted.
 - The actual documented CLI, in standalone and protected modes: parse stdout readiness, perform
-  the HTTP lifecycle, and reject missing/wrong authentication on every protected route.
+  the HTTP lifecycle, and reject missing/wrong authentication on every protected route. Run the
+  shipped client in a separate process with a real binary input and paths containing spaces;
+  verify the saved bytes, remote cleanup, rejected credentials and refusal to overwrite a local file.
 - Invalid CLI configuration: report failure, exit nonzero and never advertise readiness.
 
 Separate consumers use IPC only to ask their host application to invoke public `close()`, then
@@ -84,7 +87,9 @@ These floors are regression guards, not a claim of complete coverage. E2E runs u
 installed JavaScript and is intentionally outside the Jest percentage.
 
 Every Node 22/24 job on Ubuntu, macOS and Windows Server 2022 runs the complete check, including
-coverage and process E2E, followed by the runtime dependency audit. A 15-minute job timeout bounds
+coverage and process E2E, followed by runtime and complete dependency audits. Runtime audit fails
+on high findings; the complete audit fails on moderate findings, retaining only the explicitly
+tracked low development findings. A 15-minute job timeout bounds
 unexpected hangs. A separate duplicate coverage job is unnecessary. The release workflow uses the
 same complete check before its explicitly tag-triggered publication.
 
@@ -95,8 +100,10 @@ distributed/multiple owners, power loss, every native CPU architecture or unboun
 operations are synchronous, listing is unpaginated, and a deletion waiting on a slow read can block
 the metadata queue. Those constraints remain documented in [operations](OPERATIONS.md).
 
-Production dependencies have no currently reported audit findings. The full development audit
-retains four low-severity records from one KaTeX advisory. A known npm/native-build issue still
+The October 31, 2026 audit reports zero production findings. The complete audit retains ten
+low-severity records from two development-only advisories (KaTeX and deepmerge), tracked in
+[#25](https://github.com/jesselpalmer/easy-blob/issues/25). Temporary development overrides clear
+the new moderate/high findings and require upstream follow-up. A known npm/native-build issue still
 requires a compatible compiler toolchain in some installations. See
 [dependency decisions](DEPENDENCIES.md). Audit results and the supported matrix do not establish
 the absence of all security or platform defects.
