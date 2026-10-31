@@ -26,9 +26,10 @@ try {
   assert(artifact.files.some((file) => file.path === 'dist/index.js'));
   assert(artifact.files.some((file) => file.path === 'dist/index.d.ts'));
   assert(artifact.files.some((file) => file.path === 'examples/server.cjs'));
+  assert(artifact.files.some((file) => file.path === 'examples/client.mjs'));
   for (const { path: filename } of artifact.files) {
     assert(
-      /^(?:dist\/[^/]+\.(?:js|d\.ts)|examples\/(?:server\.cjs|README\.md)|docs\/[^/]+\.md|[A-Z][A-Z_.-]*\.md|LICENSE|package\.json)$/.test(
+      /^(?:dist\/[^/]+\.(?:js|d\.ts)|examples\/(?:server\.cjs|client\.mjs|README\.md)|docs\/[^/]+\.md|[A-Z][A-Z_.-]*\.md|LICENSE|package\.json)$/.test(
         filename
       ),
       'Unexpected packaged file: ' + filename

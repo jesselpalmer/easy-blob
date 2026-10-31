@@ -22,7 +22,7 @@ contracts; documentation and the release checklist depend on verified final beha
 Existing dependency PRs #9, #10, #11, #12, #13, #14 and #16 are reviewed as overlapping work,
 not duplicated as individual upgrade tickets.
 See [verification evidence](docs/VERIFICATION.md), [release checklist](docs/RELEASE.md) and
-[migration guidance](docs/MIGRATION.md). Issues remain open until the implementation is merged.
+[migration guidance](docs/MIGRATION.md). Implementation merged in PR #22; issues #17–#21 are closed.
 
 Exit conditions: clean installation, CJS/ESM/TypeScript consumers, tested examples, exact byte
 preservation, old-data compatibility, documented failure/recovery and concurrency behavior,
@@ -40,8 +40,18 @@ No distributed storage, cloud adapters, admin UI, background service or speculat
 format maintained code and configuration, separate pure unit and real integration suites,
 and exercise cleanly installed packages from a separate client process. Preserve the existing
 storage and lifecycle contracts and verify every layer through the supported CI matrix.
-Status: implemented; complete local checks pass on Node 22/24. The follow-up PR tracks CI verification.
+Status: merged in PR #24; all six OS/runtime jobs passed before merge. Issue #23 is closed.
 See [testing architecture](docs/TESTING.md).
+
+## Dependency cleanup and client walkthrough
+
+After the quality audit merge, refresh compatible dependencies, reconcile seven superseded dependency
+PRs, validate development security overrides and keep remaining low advisories explicit in
+[#25](https://github.com/jesselpalmer/easy-blob/issues/25). Add weekly dependency maintenance and
+moderate-or-higher development audit gates. Ship a [client walkthrough](examples/README.md) that
+uploads a real file, lists its returned ID, downloads and checks exact bytes, saves locally and
+cleans up its remote upload. Verify the packaged client against standalone/authenticated servers.
+The follow-up PR records local results and hosted CI before merge; publication remains separate.
 
 ## Adoption validation
 

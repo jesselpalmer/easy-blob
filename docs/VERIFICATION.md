@@ -6,6 +6,32 @@ The initial work was merged by the maintainer in
 [#22](https://github.com/jesselpalmer/easy-blob/pull/22) at
 `3697b5184f11a036d7b5f95625543340f5566aa4`. This follow-up does not publish or tag a release.
 
+## October 31 dependency and usage follow-up
+
+PR #24 merged at `276726e0b2b953ebfd95c9f8e723c25624917bb6`. The next follow-up refreshes
+compatible dependencies, validates temporary development security overrides and adds the packaged
+`examples/client.mjs` walkthrough. It runs against the actual installed server in another process,
+using standalone and authenticated mounts. Checks include real binary input, paths containing spaces,
+the returned upload ID, byte-accurate local downloads, remote cleanup, refusal to replace an existing
+file and rejected credentials. The five existing process scenarios now include these client checks.
+
+Local complete checks on Linux / Node 24.22.1 pass: all 172 Jest cases, enforced coverage,
+clean installed CJS/ESM/TypeScript consumers and all five process scenarios. Coverage remains
+89.42% statements / 82.38% branches / 86.76% functions / 91.51% lines. Normal install scripts run;
+the previously documented matching-header sandbox workaround remains necessary locally.
+Before/after comparisons confirm the actual Markdown/source globs, ESLint file selection and Jest
+test discovery stay unchanged with the glob/minimatch overrides. `npm ls --depth=0` reports no
+invalid direct dependencies. The follow-up PR's Actions results establish hosted OS/runtime status;
+local results alone do not establish that matrix.
+
+The fresh full audit initially reported 35 affected records (3 high / 26 moderate / 6 low).
+After remediation it reports zero high/moderate and ten low records from two development-only
+advisories: KaTeX and deepmerge. Runtime audit remains zero. These current results supersede the
+older audit observations below. [Dependency decisions](DEPENDENCIES.md) explains the tested overrides,
+exposure, upstream constraints and removal conditions; [#25](https://github.com/jesselpalmer/easy-blob/issues/25)
+tracks the remaining findings. CI and release validation reject moderate-or-higher full-audit findings.
+No tag or package publication is part of this follow-up.
+
 ## Quality audit follow-up
 
 The follow-up in [#23](https://github.com/jesselpalmer/easy-blob/issues/23) adds actual ESLint checks,
