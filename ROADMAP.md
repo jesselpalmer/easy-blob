@@ -53,6 +53,15 @@ uploads a real file, lists its returned ID, downloads and checks exact bytes, sa
 cleans up its remote upload. Verify the packaged client against standalone/authenticated servers.
 The follow-up PR records local results and hosted CI before merge; publication remains separate.
 
+## Resolve the remaining development advisories
+
+[#25](https://github.com/jesselpalmer/easy-blob/issues/25): remove the affected Jest/deepmerge chain
+with Vitest/V8 coverage, validate patched KaTeX through the real Markdown parser and renderer, retain
+all 172 application cases and both coverage scopes, and require zero full/runtime audit findings.
+Add isolated security/compatibility regressions and preserve installed-package/client E2E. The
+remediation PR records CI evidence. Necessary secure override retirement is separated into
+[#27](https://github.com/jesselpalmer/easy-blob/issues/27), pending compatible parent ranges.
+
 ## Adoption validation
 
 Outcome: five independent developers integrate the candidate into real local tools, small applications

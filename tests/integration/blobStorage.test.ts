@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import { mkdtemp, readdir, rm, unlink } from 'node:fs/promises';
@@ -37,7 +38,7 @@ async function download(storage: BlobStorage, id: number) {
 }
 
 afterEach(async () => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
   const current = fixtures.splice(0);
   const results = await Promise.allSettled(
     current.map(async ({ root, storage }) => {
@@ -224,9 +225,9 @@ describe('public storage HTTP contract', () => {
     async (operation) => {
       const f = await fixture();
       await f.storage.ready();
-      jest
-        .spyOn(LocalStore.prototype, operation)
-        .mockRejectedValueOnce(new Error('sensitive local path and internal failure'));
+      vi.spyOn(LocalStore.prototype, operation).mockRejectedValueOnce(
+        new Error('sensitive local path and internal failure')
+      );
       const response = await upload(f.storage, Buffer.from('must not be acknowledged'));
       expect(response.status).toBe(500);
       expect(response.body).toEqual({ error: 'Server error' });
@@ -241,17 +242,15 @@ describe('public storage HTTP contract', () => {
     const created = await upload(storage, Buffer.alloc(256 * 1024, 11), 'metadata-error.bin');
     expect(created.status).toBe(200);
     const original = LocalStore.prototype.open;
-    jest.spyOn(LocalStore.prototype, 'open').mockImplementationOnce(async function (
+    vi.spyOn(LocalStore.prototype, 'open').mockImplementationOnce(async function (
       this: LocalStore,
       ...args
     ) {
       const opened = await original.apply(this, args);
       if (opened) {
-        jest
-          .spyOn(opened.handle, 'stat')
-          .mockRejectedValueOnce(
-            Object.assign(new Error('controlled stat failure'), { code: 'EIO' })
-          );
+        vi.spyOn(opened.handle, 'stat').mockRejectedValueOnce(
+          Object.assign(new Error('controlled stat failure'), { code: 'EIO' })
+        );
       }
       return opened;
     });
@@ -271,14 +270,14 @@ describe('public storage HTTP contract', () => {
     const created = await upload(storage, Buffer.alloc(512 * 1024, 7), 'broken.bin');
     expect(created.status).toBe(200);
     const original = LocalStore.prototype.open;
-    jest.spyOn(LocalStore.prototype, 'open').mockImplementationOnce(async function (
+    vi.spyOn(LocalStore.prototype, 'open').mockImplementationOnce(async function (
       this: LocalStore,
       ...args
     ) {
       const opened = await original.apply(this, args);
       if (opened) {
         const read = opened.handle.createReadStream.bind(opened.handle);
-        jest.spyOn(opened.handle, 'createReadStream').mockImplementationOnce((options) => {
+        vi.spyOn(opened.handle, 'createReadStream').mockImplementationOnce((options) => {
           const stream = read(options);
           stream.once('data', () => stream.destroy(new Error('controlled disk read failure')));
           return stream;
@@ -295,7 +294,7 @@ describe('public storage HTTP contract', () => {
   test('authorization before the mounted router protects every route', async () => {
     const { storage } = await fixture();
     const app = express();
-    const authenticate = jest.fn(
+    const authenticate = vi.fn(
       (req: express.Request, res: express.Response, next: express.NextFunction) => {
         if (req.get('authorization') !== 'Bearer valid') {
           res.status(401).json({ error: 'Unauthorized' });
@@ -360,7 +359,12 @@ describe('public storage HTTP contract', () => {
     expect(responses.at(-1)!.status).toBe(200);
     for (const response of responses.slice(0, -1)) {
       expect([200, 404]).toContain(response.status);
-      if (response.status === 200) expect(response.body).toEqual(bytes);
+      if (response.status === 200) {
+        // Compare bytes natively: generic object matching walks 256K Buffer keys
+        // per response and can exhaust the test deadline under coverage.
+        expect(Buffer.isBuffer(response.body)).toBe(true);
+        expect(response.body.equals(bytes)).toBe(true);
+      }
     }
   });
 });

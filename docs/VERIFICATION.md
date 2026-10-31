@@ -6,6 +6,32 @@ The initial work was merged by the maintainer in
 [#22](https://github.com/jesselpalmer/easy-blob/pull/22) at
 `3697b5184f11a036d7b5f95625543340f5566aa4`. This follow-up does not publish or tag a release.
 
+## Issue #25 remediation
+
+The maintainer requested immediate resolution after PR #26 merged. Replace Jest/ts-jest with Vitest
+5.0.5 and V8 coverage to remove deepmerge; remove the now-unused glob override; verify patched
+KaTeX 0.18.2 through the existing Markdown math integration. Production source and resolved runtime
+dependency versions are unchanged. Full and runtime audits report **zero findings**, with low
+severity now rejected in CI/release automation as well. Necessary secure overrides are tracked in
+[#27](https://github.com/jesselpalmer/easy-blob/issues/27); they are not accepted vulnerabilities.
+
+On Linux / Node 24.22.1, all 172 original unit/integration cases pass with strict test/configuration
+type checking. V8 reports 89.90% statements / 85.01% branches / 88.42% functions / 94.70% lines.
+All five production files are present in the coverage JSON; pure validation reports 100% in each
+metric. Counter mapping differs from Jest, so percentages are not evidence of added coverage.
+The original validation and non-validation aggregate floors remain. Deliberately impossible
+thresholds in each group produce the expected failures, verifying neither gate is silently skipped.
+
+Five tooling cases verify math rendering, explicit trust, ordinary Markdown lint rules, absence of
+the removed dependency chains and the inherited-trust bypass. The security regression runs in an
+isolated child and was confirmed to fail through the old KaTeX 0.16.47 parser/renderer integration,
+then pass through patched 0.18.2. No private fork, severity exclusion or linter downgrade is used.
+The HTTP read/delete race now compares Buffer bytes natively, avoiding generic matcher enumeration
+of millions of Buffer keys under coverage while retaining the same byte equality assertion.
+
+The remediation PR records the final clean-install/complete-check results and hosted OS/runtime
+matrix. The older review and audit observations below describe their respective earlier revisions.
+
 ## October 31 dependency and usage follow-up
 
 PR #24 merged at `276726e0b2b953ebfd95c9f8e723c25624917bb6`. The next follow-up refreshes

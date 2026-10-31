@@ -30,12 +30,16 @@ through the installed artifact rather than relying on the source tree.
 | Unit | `npm run test:unit` | Defaults, limits, MIME policy copying, canonical IDs, portable paths and metadata validation |
 | Integration | `npm run test:integration` | Actual SQLite/filesystem/HTTP interactions, fault compensation, recovery, concurrency and lifecycle |
 | Installed-package E2E | `npm run test:e2e` | Clean installation, CJS/ESM/types, examples and separate-process user flows |
-| Unit + integration | `npm test` | Both Jest projects, useful during development |
-| Coverage | `npm run test:coverage` | Both Jest projects with enforced coverage floors |
-| Complete check | `npm run check` | Build, ESLint, Markdown, formatting, coverage and installed-package E2E |
+| Unit + integration | `npm test` | Strict test/config type checks and both Vitest projects |
+| Coverage | `npm run test:coverage` | Strict test/config type checks and both Vitest projects with enforced V8 coverage floors |
+| Tooling | `npm run test:tooling` | Markdown/math compatibility, isolated inherited-trust regression and removed dependency chains |
+| Test types | `npm run typecheck:tests` | Strict TypeScript checking of production source, tests and runner configuration |
+| Complete check | `npm run check` | Build, ESLint, Markdown, formatting, test types, coverage, tooling and installed-package E2E |
 
-The follow-up suite has 84 unit cases and retains all 88 integration cases. Unit and integration
-projects are explicitly selected by directory in Jest. Integration tests use real temporary
+The suite has 84 unit cases and 88 integration cases, retained during the migration from Jest to
+Vitest 5 to remove the affected deepmerge chain. Unit and integration projects are explicitly
+selected by directory. They run sequentially in isolated fork processes. Tests import APIs explicitly;
+`tsconfig.tests.json` checks their types separately before execution. Integration tests use real temporary
 directories, SQLite and HTTP. Fault injection is reserved for failures such as metadata insertion,
 unlink, stream errors and identity binding; it establishes observable compensation or recovery.
 
@@ -82,14 +86,17 @@ the npm-owned lockfile are excluded from Prettier. `npm run format` applies thes
 
 Coverage floors prevent broad regressions: the non-validation group requires 85% statements,
 75% branches, 85% functions and 90% lines. Pure validation separately requires 100% statements,
-functions and lines, and 95% branches. Jest subtracts separately gated files from its global group.
-These floors are regression guards, not a claim of complete coverage. E2E runs uninstrumented
-installed JavaScript and is intentionally outside the Jest percentage.
+functions and lines, and 95% branches. Vitest does not subtract separately gated files from global
+totals, so `src/**/!(validation).ts` has its own aggregate floor in addition to the global floor.
+Both the validation and non-validation gates were verified with intentionally impossible thresholds.
+The include list retains every production TypeScript file, including unexecuted code. The provider
+is V8; changed counter mapping means its percentages are not directly comparable with earlier Jest
+reports. These floors are regression guards, not a claim of complete coverage. E2E and the five Node
+tooling tests run uninstrumented JavaScript outside the production coverage percentage.
 
 Every Node 22/24 job on Ubuntu, macOS and Windows Server 2022 runs the complete check, including
-coverage and process E2E, followed by runtime and complete dependency audits. Runtime audit fails
-on high findings; the complete audit fails on moderate findings, retaining only the explicitly
-tracked low development findings. A 15-minute job timeout bounds
+coverage, tooling tests and process E2E, followed by runtime and complete dependency audits.
+Both audits now fail on every reported severity, including low; no advisory allowlist is used. A 15-minute job timeout bounds
 unexpected hangs. A separate duplicate coverage job is unnecessary. The release workflow uses the
 same complete check before its explicitly tag-triggered publication.
 
@@ -100,10 +107,12 @@ distributed/multiple owners, power loss, every native CPU architecture or unboun
 operations are synchronous, listing is unpaginated, and a deletion waiting on a slow read can block
 the metadata queue. Those constraints remain documented in [operations](OPERATIONS.md).
 
-The October 31, 2026 audit reports zero production findings. The complete audit retains ten
-low-severity records from two development-only advisories (KaTeX and deepmerge), tracked in
-[#25](https://github.com/jesselpalmer/easy-blob/issues/25). Temporary development overrides clear
-the new moderate/high findings and require upstream follow-up. A known npm/native-build issue still
-requires a compatible compiler toolchain in some installations. See
-[dependency decisions](DEPENDENCIES.md). Audit results and the supported matrix do not establish
+The issue #25 remediation reports zero full and runtime audit findings. The affected Jest/deepmerge
+chain is removed; patched KaTeX 0.18.2 is verified through the real Markdown/math parent integration.
+A disposable child process verifies inherited prototype `trust` cannot opt into trusted rendering;
+the old package fails that same regression. Three tested development overrides remain necessary
+until parent ranges adopt fixed versions; [#27](https://github.com/jesselpalmer/easy-blob/issues/27)
+tracks their eventual removal. No runtime source or resolved runtime version changes.
+A known npm/native-build issue still requires a compatible compiler toolchain in some installations.
+See [dependency decisions](DEPENDENCIES.md). Audit results and the supported matrix do not establish
 the absence of all security or platform defects.

@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import http, { Server } from 'node:http';
@@ -46,7 +47,7 @@ async function listen(app: express.Application) {
 }
 
 afterEach(async () => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
   const results = await Promise.allSettled(storages.splice(0).map((storage) => storage.close()));
   for (const server of externalServers.splice(0)) {
     if (server.listening)
@@ -254,7 +255,7 @@ describe('server lifecycle', () => {
       notifyFinished = resolve;
     });
     const original = LocalStore.prototype.writeUpload;
-    jest.spyOn(LocalStore.prototype, 'writeUpload').mockImplementation(function (
+    vi.spyOn(LocalStore.prototype, 'writeUpload').mockImplementation(function (
       this: LocalStore,
       ...args
     ) {

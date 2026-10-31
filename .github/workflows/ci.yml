@@ -31,8 +31,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
-      - name: Build, lint, unit, integration, coverage and installed-package E2E
+      - name: Build, lint, types, unit, integration, coverage, tooling and installed-package E2E
         run: npm run check
-      - run: npm audit --omit=dev --audit-level=high
-      - name: Audit development tooling (tracked low findings only)
-        run: npm audit --audit-level=moderate
+      - run: npm audit --omit=dev --audit-level=low
+      - name: Audit complete dependency tree (zero advisories)
+        run: npm audit --audit-level=low
