@@ -32,7 +32,7 @@ and attachment-only binary downloads. Read [the migration guide](MIGRATION.md) b
 - [x] Collision, filesystem/database failure, cancellation, recovery and read/delete races pass.
 - [x] Startup failure, protected middleware ordering and repeated shutdown leave no owned resources.
 - [x] Supported CI matrix passes for the candidate commit; unavailable checks remain unverified.
-- [x] Runtime/development dependency findings are reviewed with exposure and remediation recorded.
+- [x] Full and runtime audits have zero findings; tooling security regressions cover the validated remediation.
 - [x] Independent storage/security, API/package and onboarding reviews have no unresolved blocker.
 - [x] README, migration, operations, roadmap and issue status match implemented behavior.
 
@@ -47,8 +47,8 @@ item is not evidence of failure by itself; it requires a recorded result before 
    lockfile versions, changelog date and README installation instructions consistently.
 3. Rerun required checks and inspect `npm pack --dry-run`; exclude local data, credentials and artifacts.
 4. Review GitHub Actions results, permissions, npm token availability and tag/version agreement.
-   Both runtime and full audits must satisfy CI thresholds; review remaining low development
-   advisories and temporary overrides in [#25](https://github.com/jesselpalmer/easy-blob/issues/25).
+   Both runtime and full audits must report zero findings, including low severity. Review the tested
+   overrides and removal conditions in [#27](https://github.com/jesselpalmer/easy-blob/issues/27).
 5. Merge only after authorization. Create and push the matching `v<package-version>` tag only when
    publication is explicitly authorized; the release workflow can publish on that tag.
 6. Verify the registry artifact and release notes after publication, using a clean install.

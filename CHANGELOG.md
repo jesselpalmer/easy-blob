@@ -23,7 +23,10 @@ Release dates record publication, not the date a working branch was prepared.
 - Replaced the unmaintained sqlite3 driver with better-sqlite3 while retaining metadata IDs/schema.
 - Updated runtime and development dependencies and release validation; public declaration dependencies ship.
 - Refreshed compatible dependencies and validated temporary development security overrides;
-  remaining low KaTeX/deepmerge findings are tracked in issue #25.
+  follow-up remediation is recorded in issue #25.
+- Resolved those findings: replaced Jest/ts-jest with Vitest and V8 coverage to remove deepmerge,
+  validated patched KaTeX 0.18.2 through the Markdown tooling, removed the unused glob override,
+  and made CI/release audits reject low findings too. All existing cases and coverage floors remain.
 - Startup returns a promise and binds loopback by default; no library-installed signal handlers or process exit.
 - Downloads use attachment headers, `application/octet-stream` and `nosniff`.
 - Configuration, IDs, multipart inputs and persisted paths receive stricter validation.

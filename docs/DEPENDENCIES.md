@@ -4,7 +4,47 @@ Reviewed October 24, 2026 for the 2.0.0-rc.1 candidate. Registry metadata, the a
 1.0.0 tarball and upstream documentation were checked; versions below are observations from that review.
 The committed lockfile records the exact resolved dependency tree.
 
-## October 31, 2026 follow-up
+## Current resolution of issue #25
+
+The review below initially accepted two low development advisories. The maintainer requested that
+we resolve them now. The resulting tree has **zero full-audit and runtime findings**, without
+ignoring severities, downgrading the linter or adding a private dependency fork.
+
+- Replace Jest, ts-jest and Jest declarations with Vitest **5.0.5**, its matching V8 coverage provider
+  and Vite **8.3.5**. This removes the affected deepmerge configuration chain and the glob chain;
+  the obsolete glob override is deleted. The lockfile shrinks from 567 to 347 package records.
+- Preserve all **172** unit/integration cases, real filesystem/SQLite/HTTP behavior and installed
+  tarball/client E2E. Tests import Vitest explicitly; `tsc -p tsconfig.tests.json` separately checks
+  test/configuration types with strict mode and library checking enabled. Fault tests use spyable
+  ESM namespaces forwarding real Node IO, because spying on a CommonJS default does not update
+  Node's named ESM bindings. Production source and resolved runtime dependency versions are unchanged.
+- Preserve the original coverage floors for validation and the aggregate of other production files.
+  Vitest includes glob-scoped files in its global totals, so a separate non-validation glob gate
+  prevents pure validation from masking regressions. Both scopes were checked with deliberately
+  impossible thresholds: each run failed as expected. V8 reports a different counter model from Jest;
+  the new percentages are not evidence of additional application coverage.
+- Override only micromark-extension-math's KaTeX to the patched **0.18.2** line. This crosses its
+  declared range, so it is covered by five tooling tests resolving through the actual parent graph:
+  inline/block math, escaped delimiters, explicit trust, ordinary Markdown lint rules, dependency-chain
+  removal and the inherited-trust security regression. Prototype pollution runs in a disposable process.
+  The same regression fails through the old KaTeX 0.16.47 parent integration and passes after the fix.
+- Require **zero advisories**, including low severity, in CI and release audits.
+
+Vitest and Vite's declared Node engines cover our existing Node 22/24 policy. No production peer,
+export, HTTP API or runtime support policy changes. Source-checkout tests do not replace the retained
+CJS/ESM/TypeScript checks against the installed CommonJS artifact.
+
+Three validated development overrides remain necessary: minimatch 11.0.3, markdownlint's RE2JS 2.8.7,
+and the math parser's KaTeX 0.18.2. Removing them now would reinstall versions inside affected ranges.
+They contain the security fixes; they are not audit exceptions. Parent-range adoption and eventual
+removal are tracked separately in [#27](https://github.com/jesselpalmer/easy-blob/issues/27).
+[#25](https://github.com/jesselpalmer/easy-blob/issues/25) tracks the remediation PR and verification.
+
+Upstream API/compatibility references: [Vitest migration](https://vitest.dev/guide/migration/),
+[coverage threshold semantics](https://vitest.dev/config/coverage) and
+[KaTeX 0.18.2 security release](https://github.com/KaTeX/KaTeX/releases/tag/v0.18.2).
+
+## Earlier October 31, 2026 follow-up
 
 The original review below is historical. Fresh registry metadata and full/runtime audits were checked
 again after PR #24 merged. Runtime direct dependencies are already on their current supported stable

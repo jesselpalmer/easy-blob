@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "rootDir": ".",
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/unit/**/*.test.ts",
+    "tests/integration/**/*.test.ts",
+    "vitest.config.mts"
+  ],
+  "exclude": ["node_modules", "dist", "tests/e2e"]
+}

@@ -1,11 +1,21 @@
-import fs from 'node:fs/promises';
-import crypto from 'node:crypto';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
+import * as fs from 'node:fs/promises';
+import * as crypto from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 import BetterSqlite3 from 'better-sqlite3';
 import { Database } from '../../src/database';
 import { LocalStore } from '../../src/store';
+
+// Keep real Node IO while giving named ESM imports a shared, spyable namespace.
+// Spying on the CommonJS default does not update Node's named ESM bindings.
+vi.mock('node:fs/promises', async (original) => ({
+  ...(await original<typeof import('node:fs/promises')>()),
+}));
+vi.mock('node:crypto', async (original) => ({
+  ...(await original<typeof import('node:crypto')>()),
+}));
 
 let directory: string;
 let stores: LocalStore[];
@@ -28,7 +38,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
   await Promise.all(stores.map((store) => store.close()));
   await fs.rm(directory, { recursive: true, force: true });
 });
@@ -62,7 +72,7 @@ test('parallel identical original names retain every independent byte payload', 
 });
 
 test('a deterministic identifier collision fails without overwriting or unlinking the original', async () => {
-  jest.spyOn(crypto, 'randomUUID').mockReturnValue('11111111-1111-4111-8111-111111111111');
+  vi.spyOn(crypto, 'randomUUID').mockReturnValue('11111111-1111-4111-8111-111111111111');
   const store = create();
   const first = await upload(store);
   await expect(store.writeUpload(Readable.from(['replacement']))).rejects.toMatchObject({
@@ -75,7 +85,7 @@ test('a deterministic identifier collision fails without overwriting or unlinkin
 test('metadata insertion failure compensates physical file creation', async () => {
   const store = create();
   await store.ready();
-  jest.spyOn(Database.prototype, 'insertSync').mockImplementationOnce(() => {
+  vi.spyOn(Database.prototype, 'insertSync').mockImplementationOnce(() => {
     throw new Error('injected SQLite failure');
   });
   const pending = await store.writeUpload(Readable.from(['uncommitted']));
@@ -91,7 +101,7 @@ test('metadata insertion failure compensates physical file creation', async () =
 test('failed deletion transaction preserves both committed bytes and metadata', async () => {
   const store = create();
   const item = await upload(store);
-  jest.spyOn(Database.prototype, 'beginDeleteSync').mockImplementationOnce(() => {
+  vi.spyOn(Database.prototype, 'beginDeleteSync').mockImplementationOnce(() => {
     throw new Error('injected transaction failure');
   });
   await expect(store.delete(item.id)).rejects.toThrow('injected');
@@ -103,13 +113,13 @@ test('failed unlink leaves durable tombstone which restart replays', async () =>
   const store = create();
   const item = await upload(store);
   const actualUnlink = fs.unlink;
-  jest.spyOn(fs, 'unlink').mockImplementationOnce(async () => {
+  vi.spyOn(fs, 'unlink').mockImplementationOnce(async () => {
     throw Object.assign(new Error('injected unlink failure'), { code: 'EACCES' });
   });
   await expect(store.delete(item.id)).rejects.toThrow('injected');
   expect(await store.list()).toEqual([]);
   expect(await fs.readFile(path.join(directory, 'files', item.filename))).toEqual(item.bytes);
-  jest.spyOn(fs, 'unlink').mockImplementation(actualUnlink);
+  vi.spyOn(fs, 'unlink').mockImplementation(actualUnlink);
   await store.close();
   const restarted = create();
   await restarted.ready();
@@ -298,11 +308,9 @@ test('SQLite rollback undoes a journal insertion when metadata deletion fails', 
 test('file creation failure is reported without adding metadata', async () => {
   const store = create();
   await store.ready();
-  jest
-    .spyOn(fs, 'open')
-    .mockRejectedValueOnce(
-      Object.assign(new Error('injected disk permission failure'), { code: 'EACCES' })
-    );
+  vi.spyOn(fs, 'open').mockRejectedValueOnce(
+    Object.assign(new Error('injected disk permission failure'), { code: 'EACCES' })
+  );
   await expect(store.writeUpload(Readable.from(['unwritten']))).rejects.toThrow('injected disk');
   expect(await store.list()).toEqual([]);
 });
@@ -402,7 +410,7 @@ test('restoring an older matching database preserves newer unreferenced bytes', 
 
 test('a partially written initial identity binding fails closed on retry', async () => {
   const originalWriteFile = fs.writeFile;
-  jest.spyOn(fs, 'writeFile').mockImplementation(async (...args) => {
+  vi.spyOn(fs, 'writeFile').mockImplementation(async (...args) => {
     if (String(args[0]).endsWith('.easyblob-store.json'))
       throw new Error('injected marker write failure');
     return originalWriteFile(...args);
@@ -410,7 +418,7 @@ test('a partially written initial identity binding fails closed on retry', async
   const first = create();
   await expect(first.ready()).rejects.toThrow('injected marker');
   await first.close();
-  jest.restoreAllMocks();
+  vi.restoreAllMocks();
   await expect(create().ready()).rejects.toThrow('identity mismatch');
 });
 

@@ -21,20 +21,22 @@
     "start": "node -e \"console.log('Library package: see README.md and examples/server.cjs')\"",
     "prepack": "npm run build",
     "prepublishOnly": "npm run check",
-    "test": "jest --runInBand",
-    "test:coverage": "jest --runInBand --coverage",
+    "test": "npm run typecheck:tests && vitest run",
+    "test:coverage": "npm run typecheck:tests && vitest run --coverage",
     "test:package": "npm run test:e2e",
     "lint:md": "markdownlint \"*.md\" \"docs/**/*.md\" \"examples/**/*.md\"",
     "lint:md:fix": "markdownlint --fix \"*.md\" \"docs/**/*.md\" \"examples/**/*.md\"",
-    "format": "prettier --write \"{src,tests,scripts,examples}/**/*.{ts,cts,mts,js,cjs,mjs,json}\" \"*.{js,cjs,mjs,json}\" \".github/**/*.yml\" .prettierrc .markdownlint.json",
-    "format:check": "prettier --check \"{src,tests,scripts,examples}/**/*.{ts,cts,mts,js,cjs,mjs,json}\" \"*.{js,cjs,mjs,json}\" \".github/**/*.yml\" .prettierrc .markdownlint.json",
+    "format": "prettier --write \"{src,tests,scripts,examples}/**/*.{ts,cts,mts,js,cjs,mjs,json}\" \"*.{ts,cts,mts,js,cjs,mjs,json}\" \".github/**/*.yml\" .prettierrc .markdownlint.json",
+    "format:check": "prettier --check \"{src,tests,scripts,examples}/**/*.{ts,cts,mts,js,cjs,mjs,json}\" \"*.{ts,cts,mts,js,cjs,mjs,json}\" \".github/**/*.yml\" .prettierrc .markdownlint.json",
     "lint": "npm run lint:code && npm run lint:md && npm run format:check",
-    "check": "npm run build && npm run lint && npm run test:coverage && node scripts/verify-package.cjs",
+    "check": "npm run build && npm run lint && npm run test:coverage && npm run test:tooling && node scripts/verify-package.cjs",
     "audit:runtime": "npm audit --omit=dev",
-    "test:unit": "jest --runInBand --selectProjects unit",
-    "test:integration": "jest --runInBand --selectProjects integration",
+    "test:unit": "npm run typecheck:tests && vitest run --project unit",
+    "test:integration": "npm run typecheck:tests && vitest run --project integration",
     "test:e2e": "npm run build && node scripts/verify-package.cjs",
-    "lint:code": "eslint . --max-warnings=0"
+    "lint:code": "eslint . --max-warnings=0",
+    "typecheck:tests": "tsc -p tsconfig.tests.json",
+    "test:tooling": "node --test tests/tooling/dependencies.test.mjs"
   },
   "repository": {
     "type": "git",
@@ -67,27 +69,29 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^9.6.0",
-    "@types/jest": "^30.0.0",
     "@types/multer": "^2.3.0",
     "@types/supertest": "^7.2.1",
     "eslint": "^10.14.0",
     "globals": "^17.13.0",
-    "jest": "^30.5.2",
     "markdownlint-cli": "^0.50.0",
     "prettier": "^3.9.10",
     "supertest": "^7.3.1",
-    "ts-jest": "^29.4.15",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.72.1"
+    "typescript-eslint": "^8.72.1",
+    "vitest": "5.0.5",
+    "@vitest/coverage-v8": "5.0.5",
+    "vite": "^8.3.5"
   },
   "engines": {
     "node": "^22.23.4 || ^24.22.1"
   },
   "overrides": {
     "minimatch": "11.0.3",
-    "glob": "14.0.3",
     "markdownlint": {
       "re2js": "2.8.7"
+    },
+    "micromark-extension-math": {
+      "katex": "0.18.2"
     }
   }
 }

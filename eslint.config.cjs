@@ -25,6 +25,5 @@ module.exports = defineConfig(
     languageOptions: {
       parserOptions: { projectService: true, tsconfigRootDir: __dirname },
     },
-  },
-  { files: ['tests/**/*.test.ts'], languageOptions: { globals: globals.jest } }
+  }
 );
