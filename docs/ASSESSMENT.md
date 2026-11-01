@@ -26,7 +26,9 @@ The published 1.0.0 package reports this same git revision; artifact inspection 
 Crash durability, recovery after interruption, competing owners, supported module consumption,
 native installation across platforms and dependency security require experiments beyond source review.
 No claim of power-loss durability or multi-process support is justified by the baseline.
-Baseline installation, build, lint and test results are recorded in the [verification report](VERIFICATION.md).
+Baseline installation, build, lint and test results are preserved in the
+[historical verification report](https://github.com/jesselpalmer/easy-blob/blob/a1e195150be54d4e5b2e44dbd9c3496f4ade6128/docs/VERIFICATION.md#baseline-and-reproducibility).
+See the [current verification report](VERIFICATION.md) for stable 2.0.0 checks.
 
 ## Dependency work already open
 

@@ -5,8 +5,9 @@ This report describes the prepared **2.0.0 stable** tree. The lockfile records e
 
 ## Runtime and compatibility
 
-Support Node.js 22.23.4+ within 22.x and 24.22.1+ within 24.x. The package engines and CI enforce
-these supported lines. Keep Node updated within them; a minimum cannot predict future security fixes.
+Support Node.js 22.23.4+ within 22.x and 24.22.1+ within 24.x. The package engines declare
+these supported lines; CI tests their current patch releases. Keep Node updated within them;
+a minimum cannot predict future security fixes.
 
 | Dependency | Selected baseline | Reason |
 | --- | --- | --- |

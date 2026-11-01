@@ -71,6 +71,12 @@ Reviewers executed independently on Linux / Node 24.22.1; hosted CI provides the
 execution evidence. The KaTeX trust regression fails through the old 0.16.47 parser/renderer and
 passes through patched 0.18.2 in a disposable child process.
 
+The stable preparation received three fresh-context reviews covering tracked references and links,
+API/example/operations contracts, and release/package/verification consistency. They found stale
+credential and compiler-tooling references, contradictory publication-date instructions, a historical
+evidence link and an overstated runtime-enforcement sentence. Those documentation findings were
+corrected; the preparation PR records re-review and checks on the final head.
+
 ## Installation and qualification limits
 
 Local native installation can require matching official Node headers extracted without ownership

@@ -16,7 +16,7 @@ updates:
       # Keep declarations aligned with the oldest supported Node major.
       - dependency-name: '@types/node'
         update-types: [version-update:semver-major]
-      # Compiler majors need coordinated ts-jest and typed-lint compatibility review.
+      # Compiler majors need coordinated Vitest and typed-lint compatibility review.
       - dependency-name: typescript
         update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
