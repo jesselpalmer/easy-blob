@@ -1,6 +1,6 @@
 # Dependency and packaging decisions
 
-This report describes the prepared **2.0.0 stable** tree. The lockfile records exact resolutions;
+This report describes the **2.0.0 stable** dependency tree. The lockfile records exact resolutions;
 [the release checklist](RELEASE.md) records publication gates. No RC publication is planned.
 
 ## Runtime and compatibility

@@ -38,6 +38,5 @@ in [SECURITY.md](SECURITY.md).
 
 Follow [the release checklist](docs/RELEASE.md). Ordinary pushes and pull requests run validation only.
 The tag-triggered workflow can publish; pushing a release tag, merging and npm publication require an
-explicit maintainer decision. Never use publication as a packaging test. The prepared stable version is 2.0.0
-because lifecycle, runtime and security behavior change;
-see the migration guide. An RC is not required for this release.
+explicit maintainer decision. Never use publication as a packaging test. Version 2.0.0 includes breaking
+lifecycle, runtime and security changes; see the migration guide. An RC is not required for this release.

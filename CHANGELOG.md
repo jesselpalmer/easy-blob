@@ -3,7 +3,7 @@
 Entries remain Unreleased during preparation. The final authorized publication commit sets an
 intended release date; npm and the GitHub release confirm whether publication succeeded.
 
-## [2.0.0] - Unreleased
+## [2.0.0] - 2026-11-01
 
 ### Added
 
@@ -42,8 +42,8 @@ intended release date; npm and the GitHub release confirm whether publication su
 - Clean TypeScript consumers lacked the Express declarations required by public types.
 
 See [migration](docs/MIGRATION.md), [operations](docs/OPERATIONS.md) and
-[release verification](docs/RELEASE.md). 2.0.0 is prepared for stable publication; no RC will be published.
-The entry remains Unreleased during preparation; see the release checklist for publication verification.
+[release verification](docs/RELEASE.md). 2.0.0 is a direct stable release, with no RC.
+Confirm publication through [GitHub releases](https://github.com/jesselpalmer/easy-blob/releases) and npm.
 
 ## [1.0.0] - 2025-06-16
 
