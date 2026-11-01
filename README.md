@@ -1,6 +1,7 @@
 # EasyBlob
 
-[![CI](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml/badge.svg)](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml)
+[![CI](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/jesselpalmer/easy-blob/actions/workflows/ci.yml?query=branch%3Amain)
+[![npm](https://img.shields.io/npm/dw/@jesselpalmer/easy-blob.svg)](https://www.npmjs.com/package/@jesselpalmer/easy-blob)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 EasyBlob adds local file uploads, listing, downloads and deletion to a Node.js application.
