@@ -2,10 +2,12 @@
 
 ## 2.0.0 stable release
 
-The maintainer chose to publish **2.0.0** directly, with no RC. The implementation and quality work
-are merged; the release-preparation PR finalizes version metadata and current documentation.
-The package is not yet tagged or published. [Release checklist](docs/RELEASE.md) ·
-[Release notes](docs/RELEASE_NOTES.md) · [Verification](docs/VERIFICATION.md)
+The 2.0.0 release plan uses a direct stable publication, with no RC. The implementation and quality
+work are merged; [PR #30](https://github.com/jesselpalmer/easy-blob/pull/30) covers the stable version
+and release documentation. For live publication status, check
+[npm](https://www.npmjs.com/package/@jesselpalmer/easy-blob?activeTab=versions) and
+[GitHub releases](https://github.com/jesselpalmer/easy-blob/releases).
+[Release procedure](docs/RELEASE.md) · [Release notes](docs/RELEASE_NOTES.md) · [Verification](docs/VERIFICATION.md)
 
 | Work | Evidence | Status |
 | --- | --- | --- |
@@ -18,8 +20,8 @@ The package is not yet tagged or published. [Release checklist](docs/RELEASE.md)
 | Dependency cleanup and complete client walkthrough | PR #26 | Merged; superseded dependency PRs closed |
 | Zero full/runtime audit findings, Vitest migration and tooling regressions | Issue #25; PR #28 | Merged; independently reviewed; issue closed |
 | Minimal CI, weekly download and license badges | PR #29 | Merged |
-| Stable version, final docs, release notes, package inspection and final CI | Release-preparation PR | In progress |
-| Tag, npm publication and registry verification | `v2.0.0`; npm `latest` | Awaiting final verification and maintainer authorization |
+| Stable version, final docs, release notes, package inspection and CI | PR #30 | Preparation and exact CI evidence recorded in the PR |
+| Tag, npm publication and registry verification | `v2.0.0`; npm `latest` | Live status in npm, GitHub releases and the release workflow |
 
 The six obsolete remote branches were removed after checking their closed/merged PRs. No open PR
 remained before release preparation. Historical assessment and implementation evidence remain in

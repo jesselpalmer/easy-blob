@@ -17,9 +17,9 @@ Use it when a local disk and one application instance meet your persistence and 
 npm install @jesselpalmer/easy-blob@^2.0.0
 ```
 
-This README describes **2.0.0**. The stable release is being prepared; the registry installation
-command applies once it is published. See [release status and verification](docs/RELEASE.md).
-For pre-publication testing, build and install the prepared tarball:
+This README describes **2.0.0**. Check [npm](https://www.npmjs.com/package/@jesselpalmer/easy-blob?activeTab=versions)
+and [GitHub releases](https://github.com/jesselpalmer/easy-blob/releases) for published versions.
+See [release verification](docs/RELEASE.md). To test a checkout before publication, build and install its tarball:
 
 ```sh
 npm ci

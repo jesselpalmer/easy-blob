@@ -2,10 +2,11 @@
 
 Target version: **2.0.0**, published to npm's **latest** dist-tag with Git tag **v2.0.0**.
 The maintainer chose a direct stable release; no RC publication is planned.
-Status: release preparation, not yet tagged or published. Keep the changelog **Unreleased** during
-preparation; the final authorized publication commit sets the intended release date. A dated entry
-is not proof of publication: confirm the npm registry and GitHub release. Preparing this branch
-does not authorize publication.
+This document is the release procedure, not a live publication-status tracker. Confirm publication
+in [npm](https://www.npmjs.com/package/@jesselpalmer/easy-blob?activeTab=versions) and
+[GitHub releases](https://github.com/jesselpalmer/easy-blob/releases). Keep the changelog **Unreleased**
+during preparation; the final authorized publication commit sets the intended release date.
+Preparing this branch does not authorize publication.
 
 ## Release contents
 
@@ -25,39 +26,37 @@ breaking changes and require the 2.0 major version.
 - [x] Package and lockfile identify stable 2.0.0; current instructions no longer require an RC.
 - [x] Clean install and complete check pass locally for stable 2.0.0.
 - [x] Full and runtime audits report zero findings for the prepared lockfile.
-- [ ] Before tagging, confirm all six Node 22/24 × Linux/macOS/Windows jobs pass on final `main`.
-  The preparation PR records its own exact passing head and run.
 - [x] Inspect the preparation artifact file list, size and integrity; the PR records the result.
 - [x] Maintainer reports configuring `NPM_TOKEN` for the release workflow.
-- [ ] Validate that the configured credential can publish this package before pushing the release tag.
-  Configuration alone does not prove token validity, expiration or publishing scope. Never commit the token.
 
-The release-preparation PR records the exact checked commit and CI evidence. An unchecked item
-requires an observed result, not an assumption. [#27](https://github.com/jesselpalmer/easy-blob/issues/27)
+[PR #30](https://github.com/jesselpalmer/easy-blob/pull/30) records the exact checked commit and CI
+evidence. Final-commit CI and credential verification are execution steps below, not outstanding
+checkboxes to update after publication. [#27](https://github.com/jesselpalmer/easy-blob/issues/27)
 tracks eventual retirement of three tested security overrides; it is maintenance and does not block
 this release while audits and integration checks remain clean.
 
 ## Publication after maintainer authorization
 
-1. Merge the verified preparation PR. Review CI on the exact final `main` commit.
-2. Once publication is authorized, set the changelog's intended 2.0.0 release date in the final
-   publication commit. Update the README's preparation notice to link release/registry status
-   without claiming a successful publication. Run Markdown checks and CI on that exact commit.
-   If the release is postponed before tagging, correct the intended date and recheck the new commit.
+1. Merge the verified preparation PR.
+2. Once publication is authorized, finalize the changelog's intended 2.0.0 release date and any
+   remaining release metadata before tagging. Keep publication status linked to npm and GitHub
+   releases. Confirm the CI run on the exact final `main` commit passed all six Node 22/24 ×
+   Linux/macOS/Windows jobs. The tag must point to that commit. If the release is postponed before
+   tagging, correct the intended date and recheck the new commit.
 3. Confirm `package.json` and the root lockfile records all say `2.0.0`; confirm npm has no existing
-   2.0.0 release and `v2.0.0` does not already exist. Confirm the workflow's npm token can publish
-   `@jesselpalmer/easy-blob`; a secret name alone does not prove validity or scope.
+   2.0.0 release and `v2.0.0` does not already exist. Confirm the workflow's npm token is valid,
+   unexpired and scoped to publish `@jesselpalmer/easy-blob`; configuration alone does not prove
+   publishing permission. Never commit the token.
 4. Only when publication is explicitly authorized, create and push `v2.0.0` at the tested commit.
    The workflow validates tag/version agreement, installs, runs the complete check and zero-advisory
    audits, then publishes publicly to `latest` and creates the GitHub release.
 5. Verify `npm view @jesselpalmer/easy-blob@2.0.0 version dist.integrity` and the npm `latest` tag.
    In a new application outside the checkout, install that registry version and run the documented
    server/client lifecycle, including authentication, exact bytes, deletion and restart persistence.
-6. After registry verification, record the confirmed publication date and GitHub release URL here.
-   Update this checklist's top-level status, the README and the roadmap to reflect publication;
-   reconcile the changelog date with the actual publication date if needed. If publication fails,
-   retain an unpublished status and record the failure rather than treating a dated entry as success.
-   Begin the opt-in [adoption study](ADOPTION.md) when participants are available.
+6. Keep publication results and any failure/recovery notes in the release workflow run, GitHub
+   release or preparation PR. The registry and release page provide the live status; no repository
+   documentation commit is required after publication. Begin the opt-in [adoption study](ADOPTION.md)
+   when participants are available.
 
 If npm succeeds but creating the GitHub release fails, confirm registry state before retrying.
 Do not force-update a published version/tag or blindly rerun an immutable npm publication. Create
