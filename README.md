@@ -11,11 +11,15 @@ local tools and internal services that have one process owning local storage.
 It is not a distributed object store, a cloud-storage abstraction or an authentication system.
 Use it when a local disk and one application instance meet your persistence and availability needs.
 
-## Install the release candidate
+## Install
 
-This branch documents **2.0.0-rc.1**, which is not yet published. The existing npm `latest` release is
-1.0.0 and does not provide the lifecycle and recovery behavior below. Build the candidate tarball
-from this checkout:
+```sh
+npm install @jesselpalmer/easy-blob@^2.0.0
+```
+
+This README describes **2.0.0**. The stable release is being prepared; the registry installation
+command applies once it is published. See [release status and verification](docs/RELEASE.md).
+For pre-publication testing, build and install the prepared tarball:
 
 ```sh
 npm ci
@@ -27,7 +31,7 @@ In a separate application directory, install the resulting tarball using its act
 
 ```sh
 npm init -y
-npm install /path/to/jesselpalmer-easy-blob-2.0.0-rc.1.tgz
+npm install /path/to/jesselpalmer-easy-blob-2.0.0.tgz
 ```
 
 Supported runtimes are **Node.js 22.23.4+ within 22.x and 24.22.1+ within 24.x**.

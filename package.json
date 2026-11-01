@@ -1,6 +1,6 @@
 {
   "name": "@jesselpalmer/easy-blob",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0",
   "description": "Local file storage with an HTTP API, SQLite metadata, and explicit recovery",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

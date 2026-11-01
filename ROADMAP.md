@@ -1,79 +1,52 @@
 # EasyBlob roadmap
 
-Planning baseline: `f99d39107c97a33c76edadcbc7801ff9f48a9803`, reviewed October 24, 2026.
-This roadmap and the linked issues were created before implementation.
+## 2.0.0 stable release
 
-## Release readiness — 2.0 candidate
+The maintainer chose to publish **2.0.0** directly, with no RC. The implementation and quality work
+are merged; the release-preparation PR finalizes version metadata and current documentation.
+The package is not yet tagged or published. [Release checklist](docs/RELEASE.md) ·
+[Release notes](docs/RELEASE_NOTES.md) · [Verification](docs/VERIFICATION.md)
 
-Outcome: a dependable, documented local storage library that works from the npm tarball.
-Status: release-readiness implementation complete, independently reviewed and verified on the supported CI matrix.
-Publication, release tags and merging require maintainer authorization.
+| Work | Evidence | Status |
+| --- | --- | --- |
+| Storage identity, consistency, recovery and ownership | Issue #17; PR #22 | Merged; issue closed |
+| Awaitable lifecycle, protected mounting and HTTP contracts | Issue #18; PR #22 | Merged; issue closed |
+| Dependencies, runtimes and packaged consumers | Issue #19; PR #22 | Merged; issue closed |
+| Isolated contract tests | Issue #20; PR #22 | Merged; issue closed |
+| Onboarding, operations and migration documentation | Issue #21; PR #22 | Merged; issue closed |
+| Code linting, formatting, unit/integration separation and outside-in E2E | Issue #23; PR #24 | Merged; issue closed |
+| Dependency cleanup and complete client walkthrough | PR #26 | Merged; superseded dependency PRs closed |
+| Zero full/runtime audit findings, Vitest migration and tooling regressions | Issue #25; PR #28 | Merged; independently reviewed; issue closed |
+| Minimal CI, weekly download and license badges | PR #29 | Merged |
+| Stable version, final docs, release notes, package inspection and final CI | Release-preparation PR | In progress |
+| Tag, npm publication and registry verification | `v2.0.0`; npm `latest` | Awaiting final verification and maintainer authorization |
 
-| Work | Priority | Ticket | Status |
-| --- | --- | --- | --- |
-| Storage identity, consistency, recovery and ownership | Critical | [#17](https://github.com/jesselpalmer/easy-blob/issues/17) | Implemented; reviewed |
-| Awaitable lifecycle, protected mounting and HTTP contracts | Critical | [#18](https://github.com/jesselpalmer/easy-blob/issues/18) | Implemented; reviewed |
-| Dependencies, supported runtimes and packaged consumers | High | [#19](https://github.com/jesselpalmer/easy-blob/issues/19) | Verified locally and in CI |
-| Isolated contract tests and verification evidence | High | [#20](https://github.com/jesselpalmer/easy-blob/issues/20) | 88 tests pass across CI |
-| Onboarding, operations, migration and release documentation | High | [#21](https://github.com/jesselpalmer/easy-blob/issues/21) | Implemented; reviewed |
+The six obsolete remote branches were removed after checking their closed/merged PRs. No open PR
+remained before release preparation. Historical assessment and implementation evidence remain in
+[the assessment](docs/ASSESSMENT.md) and merged PRs #22, #24, #26 and #28.
 
-Storage and lifecycle contracts establish the foundation. Package and integration tests verify those
-contracts; documentation and the release checklist depend on verified final behavior.
-Existing dependency PRs #9, #10, #11, #12, #13, #14 and #16 are reviewed as overlapping work,
-not duplicated as individual upgrade tickets.
-See [verification evidence](docs/VERIFICATION.md), [release checklist](docs/RELEASE.md) and
-[migration guidance](docs/MIGRATION.md). Implementation merged in PR #22; issues #17–#21 are closed.
+## Dependency maintenance
 
-Exit conditions: clean installation, CJS/ESM/TypeScript consumers, tested examples, exact byte
-preservation, old-data compatibility, documented failure/recovery and concurrency behavior,
-predictable startup/shutdown, supported dependency and CI policy, and no unresolved release blocker.
-An unavailable check must remain explicitly unverified. Independent storage, integration and
-documentation reviews must be resolved before declaring the candidate ready.
-
-Scope: one local owner of a storage directory and SQLite metadata file. Preserve existing integer
-IDs and metadata where safe. Breaking lifecycle, security and runtime changes require 2.0 migration notes.
-No distributed storage, cloud adapters, admin UI, background service or speculative framework layer.
-
-## Quality audit follow-up
-
-[#23](https://github.com/jesselpalmer/easy-blob/issues/23): add production code linting,
-format maintained code and configuration, separate pure unit and real integration suites,
-and exercise cleanly installed packages from a separate client process. Preserve the existing
-storage and lifecycle contracts and verify every layer through the supported CI matrix.
-Status: merged in PR #24; all six OS/runtime jobs passed before merge. Issue #23 is closed.
-See [testing architecture](docs/TESTING.md).
-
-## Dependency cleanup and client walkthrough
-
-After the quality audit merge, refresh compatible dependencies, reconcile seven superseded dependency
-PRs, validate development security overrides and keep remaining low advisories explicit in
-[#25](https://github.com/jesselpalmer/easy-blob/issues/25). Add weekly dependency maintenance and
-moderate-or-higher development audit gates. Ship a [client walkthrough](examples/README.md) that
-uploads a real file, lists its returned ID, downloads and checks exact bytes, saves locally and
-cleans up its remote upload. Verify the packaged client against standalone/authenticated servers.
-The follow-up PR records local results and hosted CI before merge; publication remains separate.
-
-## Resolve the remaining development advisories
-
-[#25](https://github.com/jesselpalmer/easy-blob/issues/25): remove the affected Jest/deepmerge chain
-with Vitest/V8 coverage, validate patched KaTeX through the real Markdown parser and renderer, retain
-all 172 application cases and both coverage scopes, and require zero full/runtime audit findings.
-Add isolated security/compatibility regressions and preserve installed-package/client E2E. The
-remediation PR records CI evidence. Necessary secure override retirement is separated into
-[#27](https://github.com/jesselpalmer/easy-blob/issues/27), pending compatible parent ranges.
+[#27](https://github.com/jesselpalmer/easy-blob/issues/27) tracks removal of the tested minimatch,
+RE2JS and KaTeX overrides once all parent packages adopt compatible fixed ranges. Keeping these
+validated fixes is supported configuration. The issue does not represent an accepted vulnerability
+or block 2.0.0 while the zero-advisory audits and integration checks pass. Weekly Dependabot
+maintenance remains enabled.
 
 ## Adoption validation
 
-Outcome: five independent developers integrate the candidate into real local tools, small applications
-or internal services. Depends on release readiness. Prepare an opt-in study without contacting anyone.
-The [study plan](docs/ADOPTION.md) is prepared; no outreach has occurred. Measure time to first
-successful complete lifecycle, assistance required, failures, alternatives,
-work avoided and continued use after two weeks. Record reasons for abandonment as well as successes.
-Exit: five completed reports and a documented retain, revise or stop decision; no feature expansion
-solely on survey enthusiasm.
+After publication, invite five opt-in developers to integrate 2.0.0 into real local tools, small apps
+or internal services with a single-owner storage need. The [study plan](docs/ADOPTION.md) is ready;
+no outreach or enrollment has occurred. Measure setup time, assistance, failures, work avoided,
+alternatives and continued use after two weeks. Record abandonment as well as successes.
+
+Exit: five completed reports and a documented retain, revise or stop decision. A storage-integrity or
+access-control failure pauses expansion and creates a release-blocking issue. Adoption evidence is
+not a prerequisite for the maintainer's chosen direct stable publication.
 
 ## Later improvements
 
-Only prioritize capabilities supported by the adoption evidence. Pagination, quotas, richer metadata,
-content validation and additional integrations are deferred pending demonstrated user need.
-Each promoted capability requires an independent issue, user evidence, support cost and acceptance test.
+Only prioritize capabilities supported by actual usage. Pagination, quotas, richer metadata, content
+validation and additional integrations remain deferred. Each promoted capability needs a specific
+user need, support-cost assessment and observable acceptance test. Distributed storage, cloud
+adapters, an admin UI and speculative framework layers remain outside the current scope.

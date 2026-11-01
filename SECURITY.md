@@ -6,8 +6,8 @@ is unavailable, request a private contact channel from the maintainer without po
 or sensitive data in a public issue. Do not upload production databases, secrets or user files.
 
 Include the affected version, supported Node/platform, minimal reproduction, expected/observed impact
-and any safe mitigation. There is no guaranteed response-time SLA. The release candidate is under
-review; a dependency audit result is a dated signal, not a claim that the package has no vulnerabilities.
+and any safe mitigation. There is no guaranteed response-time SLA. A dependency audit result is a dated
+signal, not a claim that the package has no vulnerabilities.
 
 The intended boundary is a single local storage owner behind application-controlled authentication,
 authorization and network controls. MIME filtering uses untrusted declarations and is not content or

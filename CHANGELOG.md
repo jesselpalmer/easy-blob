@@ -2,7 +2,7 @@
 
 Release dates record publication, not the date a working branch was prepared.
 
-## [2.0.0-rc.1] - Unreleased
+## [2.0.0] - Unreleased
 
 ### Added
 
@@ -15,18 +15,17 @@ Release dates record publication, not the date a working branch was prepared.
 - Runnable packaged example, operational guidance, migration guide and adoption-study plan.
 - Packaged HTTP client walkthrough with byte verification, protected-mount usage and cleanup;
   exercised in separate processes against the installed artifact.
-- Weekly grouped dependency maintenance and a CI/release gate for moderate development advisories.
+- Weekly grouped dependency maintenance and CI/release audit gates rejecting every advisory severity.
 
 ### Changed
 
 - Supported runtimes are Node.js 22.23.4+ within 22.x and 24.22.1+ within 24.x.
 - Replaced the unmaintained sqlite3 driver with better-sqlite3 while retaining metadata IDs/schema.
 - Updated runtime and development dependencies and release validation; public declaration dependencies ship.
-- Refreshed compatible dependencies and validated temporary development security overrides;
-  follow-up remediation is recorded in issue #25.
-- Resolved those findings: replaced Jest/ts-jest with Vitest and V8 coverage to remove deepmerge,
-  validated patched KaTeX 0.18.2 through the Markdown tooling, removed the unused glob override,
-  and made CI/release audits reject low findings too. All existing cases and coverage floors remain.
+- Replaced Jest/ts-jest with Vitest and V8 coverage, retained all application cases and coverage floors,
+  and added strict test/configuration type checking and tooling security regressions.
+- Resolved all reported runtime/development audit findings; validated security overrides and their
+  eventual upstream retirement are documented in dependency decisions and issue #27.
 - Startup returns a promise and binds loopback by default; no library-installed signal handlers or process exit.
 - Downloads use attachment headers, `application/octet-stream` and `nosniff`.
 - Configuration, IDs, multipart inputs and persisted paths receive stricter validation.
@@ -42,7 +41,9 @@ Release dates record publication, not the date a working branch was prepared.
 - Clean TypeScript consumers lacked the Express declarations required by public types.
 
 See [migration](docs/MIGRATION.md), [operations](docs/OPERATIONS.md) and
-[release verification](docs/RELEASE.md). This entry describes candidate work, not a published release.
+[release verification](docs/RELEASE.md). 2.0.0 is prepared for stable publication; no RC will be published. The
+publication date remains
+unset until the package is actually released.
 
 ## [1.0.0] - 2025-06-16
 

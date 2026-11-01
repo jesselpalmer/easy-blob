@@ -46,4 +46,5 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          body_path: docs/RELEASE_NOTES.md
           generate_release_notes: true
