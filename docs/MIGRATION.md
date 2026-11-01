@@ -1,14 +1,14 @@
 # Migrating from 1.0.0 to 2.0
 
 2.0 is a deliberate major release because supported runtimes, lifecycle, safe HTTP behavior and
-storage ownership become explicit. The release candidate is `2.0.0-rc.1`; it is not a published
-stable release until the release checklist is completed and a maintainer authorizes publication.
+storage ownership become explicit. The target stable version is **2.0.0**; the
+[release checklist](RELEASE.md) records preparation and publication status.
 
 ## Before upgrading
 
 1. Stop the 1.x application. Back up its actual SQLite database and upload directory together.
 2. Upgrade to Node.js 22.23.4+ within 22.x or 24.22.1+ within 24.x. Node 18/20 are no longer supported.
-3. Install the candidate in a test copy of the application and paired data backup first.
+3. Install 2.0.0 in a test copy of the application and paired data backup first.
 4. Ensure the database is outside the dedicated storage directory and its parent exists. Configure
    the existing paths explicitly so a working-directory change cannot create a different empty store.
 5. Run upload/list/download/delete and restart checks against that copy before deploying.
@@ -68,7 +68,7 @@ ownership/recovery contract. Do not use it to mutate a database owned by a runni
 
 ## Rollback
 
-Stop the candidate and restore the original paired backup when rolling back. Do not run 1.x against
+Stop the 2.0 application and restore the original paired backup when rolling back. Do not run 1.x against
 a database with pending 2.0 deletion work: 1.x does not understand that recovery journal. Preserve
 post-upgrade user data separately before restoring a backup; rollback is not a safe way to discard
 unreconciled operations. See [operations](OPERATIONS.md) for ownership-lock recovery.

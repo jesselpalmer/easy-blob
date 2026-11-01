@@ -1,58 +1,63 @@
-# 2.0 release candidate and release checklist
+# 2.0.0 stable release checklist
 
-Recommended stable version: **2.0.0**. Working candidate: **2.0.0-rc.1**.
-No stable release is authorized by this document. Merging, release tags and npm publication require
-an explicit maintainer decision after reviewing the candidate and verification evidence.
+Target version: **2.0.0**, published to npm's **latest** dist-tag with Git tag **v2.0.0**.
+The maintainer chose a direct stable release; no RC publication is planned.
+This document is the release procedure, not a live publication-status tracker. Confirm publication
+in [npm](https://www.npmjs.com/package/@jesselpalmer/easy-blob?activeTab=versions) and
+[GitHub releases](https://github.com/jesselpalmer/easy-blob/releases). Keep the changelog **Unreleased**
+during preparation; the final authorized publication commit sets the intended release date.
+Preparing this branch does not authorize publication.
 
-## Release notes
+## Release contents
 
-EasyBlob now has an awaited lifecycle, application-controlled process shutdown, protected Express
-mounting and explicit local storage recovery. Exclusive UUID filenames prevent same-millisecond
-upload collisions. Failed upload commits are compensated; deletion records recovery intent in SQLite
-before unlinking bytes. Existing numeric IDs and safe legacy filenames remain usable.
+Use [the prepared release notes](RELEASE_NOTES.md) for the GitHub release. The migration guide,
+operations guide and verification report describe the supported behavior and remaining limits.
+Existing safe legacy IDs and file data are retained; the runtime/lifecycle/security contracts are
+breaking changes and require the 2.0 major version.
 
-The package updates maintained dependencies, replaces the archived sqlite3 driver with better-sqlite3,
-ships declaration dependencies needed by clean TypeScript consumers, and verifies the packed package
-rather than relying only on source-checkout tests. Persistent store identities reject mismatched
-metadata/directory pairs, while unreferenced bytes are
-preserved for inspection. Operational documentation explains crash windows, manual stale-lock recovery,
-paired backups and single-owner constraints.
+## Preparation gates
 
-Breaking changes include the supported Node policy, promise-returning startup/shutdown, loopback
-binding by default, no automatic process exit, stricter identifiers/configuration/multipart handling,
-and attachment-only binary downloads. Read [the migration guide](MIGRATION.md) before upgrading.
+- [x] Storage, lifecycle, HTTP, packaging and documentation work merged in PR #22.
+- [x] Code linting, unit/integration separation and process E2E merged in PR #24.
+- [x] Dependency cleanup and the runnable client merged in PR #26.
+- [x] Remaining audit findings resolved and reviewed in PR #28; issue #25 is closed.
+- [x] Minimal CI/download/license badges merged in PR #29.
+- [x] Superseded dependency PRs are closed; six obsolete remote branches were removed.
+- [x] Package and lockfile identify stable 2.0.0; current instructions no longer require an RC.
+- [x] Clean install and complete check pass locally for stable 2.0.0.
+- [x] Full and runtime audits report zero findings for the prepared lockfile.
+- [x] Inspect the preparation artifact file list, size and integrity; the PR records the result.
+- [x] Maintainer reports configuring `NPM_TOKEN` for the release workflow.
 
-## Candidate review gates
+[PR #30](https://github.com/jesselpalmer/easy-blob/pull/30) records the exact checked commit and CI
+evidence. Final-commit CI and credential verification are execution steps below, not outstanding
+checkboxes to update after publication. [#27](https://github.com/jesselpalmer/easy-blob/issues/27)
+tracks eventual retirement of three tested security overrides; it is maintenance and does not block
+this release while audits and integration checks remain clean.
 
-- [x] `npm ci` succeeds from the committed lockfile on supported platforms/runtimes.
-- [x] `npm run check` passes, including clean installed CJS, ESM and strict TypeScript consumers.
-- [x] The actual packaged examples complete upload/list/download/delete and protected-route checks.
-- [x] The packaged client runs separately, saves matching bytes, avoids local overwrites and cleans up its own upload.
-- [x] Real text and binary downloads match uploaded bytes; restart and legacy-data fixtures pass.
-- [x] Collision, filesystem/database failure, cancellation, recovery and read/delete races pass.
-- [x] Startup failure, protected middleware ordering and repeated shutdown leave no owned resources.
-- [x] Supported CI matrix passes for the candidate commit; unavailable checks remain unverified.
-- [x] Full and runtime audits have zero findings; tooling security regressions cover the validated remediation.
-- [x] Independent storage/security, API/package and onboarding reviews have no unresolved blocker.
-- [x] README, migration, operations, roadmap and issue status match implemented behavior.
+## Publication after maintainer authorization
 
-The [verification report](VERIFICATION.md) records outcomes for the current candidate. An unchecked
-item is not evidence of failure by itself; it requires a recorded result before release readiness is claimed.
+1. Merge the verified preparation PR.
+2. Once publication is authorized, finalize the changelog's intended 2.0.0 release date and any
+   remaining release metadata before tagging. Keep publication status linked to npm and GitHub
+   releases. Confirm the CI run on the exact final `main` commit passed all six Node 22/24 ×
+   Linux/macOS/Windows jobs. The tag must point to that commit. If the release is postponed before
+   tagging, correct the intended date and recheck the new commit.
+3. Confirm `package.json` and the root lockfile records all say `2.0.0`; confirm npm has no existing
+   2.0.0 release and `v2.0.0` does not already exist. Confirm the workflow's npm token is valid,
+   unexpired and scoped to publish `@jesselpalmer/easy-blob`; configuration alone does not prove
+   publishing permission. Never commit the token.
+4. Only when publication is explicitly authorized, create and push `v2.0.0` at the tested commit.
+   The workflow validates tag/version agreement, installs, runs the complete check and zero-advisory
+   audits, then publishes publicly to `latest` and creates the GitHub release.
+5. Verify `npm view @jesselpalmer/easy-blob@2.0.0 version dist.integrity` and the npm `latest` tag.
+   In a new application outside the checkout, install that registry version and run the documented
+   server/client lifecycle, including authentication, exact bytes, deletion and restart persistence.
+6. Keep publication results and any failure/recovery notes in the release workflow run, GitHub
+   release or preparation PR. The registry and release page provide the live status; no repository
+   documentation commit is required after publication. Begin the opt-in [adoption study](ADOPTION.md)
+   when participants are available.
 
-## Publication steps after authorization
-
-1. Review the candidate PR and exact tested commit. Confirm changes in overlapping Dependabot PRs
-   are accounted for without merging obsolete dependency changes into the candidate blindly.
-2. Choose whether to publish a prerelease for external testing or finalize 2.0.0. Update package and
-   lockfile versions, changelog date and README installation instructions consistently.
-3. Rerun required checks and inspect `npm pack --dry-run`; exclude local data, credentials and artifacts.
-4. Review GitHub Actions results, permissions, npm token availability and tag/version agreement.
-   Both runtime and full audits must report zero findings, including low severity. Review the tested
-   overrides and removal conditions in [#27](https://github.com/jesselpalmer/easy-blob/issues/27).
-5. Merge only after authorization. Create and push the matching `v<package-version>` tag only when
-   publication is explicitly authorized; the release workflow can publish on that tag.
-6. Verify the registry artifact and release notes after publication, using a clean install.
-7. Begin the prepared [five-developer adoption experiment](ADOPTION.md) only with participant opt-in.
-
-Do not force-update a published tag or version. If a release artifact is wrong, prepare a new version
-with a clear correction. Keep backups and migration guidance available for operators upgrading data.
+If npm succeeds but creating the GitHub release fails, confirm registry state before retrying.
+Do not force-update a published version/tag or blindly rerun an immutable npm publication. Create
+only the missing GitHub release or prepare a new corrective package version, as appropriate.

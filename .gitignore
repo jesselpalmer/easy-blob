@@ -144,5 +144,5 @@ blob-storage.db
 testdb.sqlite
 testuploads/
 
-# Jest coverage
+# Test coverage
 coverage/

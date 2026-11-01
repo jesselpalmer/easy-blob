@@ -5,7 +5,7 @@ HTTP API with Node's built-in `fetch`, `FormData` and `Blob`; it needs no client
 
 ## Terminal 1: start the server
 
-Install the candidate tarball into a clean Node.js project as described in the root README, then run:
+Install 2.0.0 into a clean Node.js project as described in the root README, then run:
 
 ```sh
 node node_modules/@jesselpalmer/easy-blob/examples/server.cjs
@@ -92,4 +92,4 @@ main().catch(console.error);
 `npm run test:package` installs the tarball, launches the server and the actual packaged client in
 separate processes, and exercises standalone and protected mounts with temporary storage. It verifies
 binary bytes, cleanup, rejected credentials and refusal to overwrite a local download. See the
-verification report for the results of a particular candidate.
+verification report for the results of the release.

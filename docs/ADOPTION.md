@@ -8,7 +8,7 @@ Run it after the release-readiness gates pass. A smooth demo alone is not adopti
 
 ## Participants and task
 
-Invite five independent developers, each integrating the candidate into a real small application,
+Invite five independent developers, each integrating 2.0.0 into a real small application,
 local tool or internal service with a legitimate local-storage need. At least two should use an
 existing Express app and its authentication; at least one should use TypeScript. Seek a mix of
 Linux, macOS and Windows where available. Exclude integrations created only to flatter the project.
